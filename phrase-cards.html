@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>短语记忆卡片 · 练习模式</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; justify-content: center; align-items: flex-start;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 8px;
+        }
+        .game-container {
+            max-width: 800px; width: 100%;
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(4px);
+            padding: 1.2rem 1rem;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-weight: 500; color: #e9f2f7;
+            text-shadow: 0 2px 6px #0a1e2b;
+            letter-spacing: 1px;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1rem; font-size: 1.3rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        h1 small {
+            font-size: 0.85rem; font-weight: 300; opacity: 0.8;
+            background: #1f4a5e; padding: 0.3rem 0.8rem;
+            border-radius: 60px; border: 1px solid #8fc3d9;
+        }
+        .intro-text {
+            color: #bfdef0; font-size: 0.9rem;
+            line-height: 1.6; margin-bottom: 1rem;
+        }
+        .intro-text strong { color: #fcdb7a; }
+        .btn {
+            background: #fad974; border: none;
+            padding: 10px 24px; border-radius: 60px;
+            font-weight: 600; font-size: 1rem; color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+            transition: 0.06s linear; cursor: pointer;
+            border: 1px solid #ffe399; letter-spacing: 0.3px;
+            display: inline-block;
+        }
+        .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b3952b; }
+
+        /* Card */
+        .card-item {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 24px; padding: 1rem 1.2rem;
+            margin-bottom: 1rem; transition: all 0.2s;
+        }
+        .card-english {
+            color: #e9f2f7; font-size: 0.95rem;
+            line-height: 1.6; margin-bottom: 0.8rem; font-weight: 500;
+        }
+        .card-english .blank {
+            color: #fcdb7a; font-weight: 600;
+            border-bottom: 2px dashed #fcdb7a;
+            padding: 0 4px; min-width: 60px;
+            display: inline-block; text-align: center;
+        }
+        .card-answer {
+            color: #a5d6a7; font-size: 0.9rem;
+            line-height: 1.6; margin-bottom: 0.5rem;
+            padding: 0.8rem; background: rgba(0,0,0,0.2);
+            border-radius: 16px; display: none;
+        }
+        .card-answer.show { display: block; }
+        .card-hint {
+            color: #8fc3d9; font-size: 0.8rem;
+            line-height: 1.4; margin-bottom: 0.6rem;
+            padding: 6px 10px; background: rgba(255,255,255,0.05);
+            border-radius: 10px; display: none;
+        }
+        .card-hint.show { display: block; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-small {
+            padding: 6px 14px; font-size: 0.8rem;
+            border-radius: 40px; font-weight: 600;
+            cursor: pointer; border: none; transition: 0.1s;
+        }
+        .btn-reveal { background: #264e63; color: #bfdef0; border: 1px solid #578aa3; }
+        .btn-mark { background: #1d4d4b; color: #a5d6a7; border: 1px solid #479f9b; }
+        .btn-mark.marked { background: #fad974; color: #1d3f4a; border-color: #ffe399; }
+        .progress-bar {
+            background: rgba(0,0,0,0.3); border-radius: 30px;
+            height: 6px; margin: 0 0 1rem; overflow: hidden;
+        }
+        .progress-fill {
+            background: #fad974; height: 6px; border-radius: 30px;
+            transition: width 0.25s ease;
+        }
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 1rem; padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-bar .progress-text { color: #bfdef0; font-size: 0.9rem; }
+        .nav-bar .progress-text strong { color: #fcdb7a; }
+
+        @media (max-width: 480px) {
+            .game-container { padding: 0.8rem 0.6rem; border-radius: 28px; }
+            h1 { font-size: 1.1rem; }
+            .card-english { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>📝 短语记忆卡片 <small>练习模式</small></h1>
+
+    <div class="intro-text" id="practice-intro">
+        <p><strong>使用方法</strong></p>
+        <p>先自己尝试填空，点击<strong>"查看答案"</strong>对照。</p>
+        <p>注意：要根据句子的<strong>主语、时态、语态、单复数</strong>进行变化。</p>
+        <p>会了就点<strong>"记住了"</strong>，不熟点<strong>"需复习"</strong>。</p>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="practice-progress" style="width:0%"></div></div>
+    <div id="cards-container"></div>
+    <div class="nav-bar">
+        <span class="progress-text">进度: <strong id="card-progress">0/0</strong></span>
+    </div>
+</div>
+
+<script>
+(function(){
+    const ALL_CARDS = [
+        { id: 1, unit: 'U1', sentence: 'With your generous support, our charity fund will be _____ for continued growth and success.', phrase: 'poised', hint: '主语是 charity fund（第三人称单数），will be 后接形容词 / poised' },
+        { id: 2, unit: 'U1', sentence: 'The dock was constructed on a(n) _____ scale with the most modern equipment.', phrase: 'lavish', hint: '修饰名词 scale，用形容词原级 / lavish' },
+        { id: 3, unit: 'U1', sentence: 'Advances in mobile phone technology have enabled the rapid development of _____ communication.', phrase: 'instantaneous', hint: '修饰名词 communication，用形容词 / instantaneous' },
+        { id: 4, unit: 'U1', sentence: 'Computers, vehicles, paintings, furniture, etc. are all _____ assets.', phrase: 'tangible', hint: '主语是复数，be 动词后接形容词 / tangible' },
+        { id: 5, unit: 'U1', sentence: 'Students can overcome _____ together through teamwork.', phrase: 'hurdles', hint: '克服多种困难，用复数形式 / hurdles' },
+        { id: 6, unit: 'U1', sentence: 'China rolled out digital driver\'s licenses amid efforts to _____ services.', phrase: 'streamline', hint: 'to 后接动词原形 / streamline' },
+        { id: 7, unit: 'U1', sentence: 'Long-term confinement is _____ to the physical well-being of animals.', phrase: 'detrimental', hint: 'be 动词后接形容词 / detrimental' },
+        { id: 8, unit: 'U1', sentence: 'The museum is designed to _____ the interest of children in science.', phrase: 'evoke', hint: 'to 后接动词原形 / evoke' },
+        { id: 9, unit: 'U1', sentence: 'This study tests the _____ that air pollution contributes to lung diseases.', phrase: 'hypothesis', hint: 'the 后接名词单数 / hypothesis' },
+        { id: 10, unit: 'U1', sentence: 'If your stress is _____ into more serious issues, seek professional help.', phrase: 'escalating', hint: 'is 后接现在分词构成进行时 / escalating' },
+        { id: 11, unit: 'U3', sentence: 'The professor gave remarks to bring _____ to the issue being discussed.', phrase: 'clarity', hint: 'bring 后接名词 / clarity' },
+        { id: 12, unit: 'U3', sentence: 'Many governments are _____ to invest in technology to tackle problems.', phrase: 'keen', hint: 'be keen to 固定搭配 / keen' },
+        { id: 13, unit: 'U3', sentence: 'The hotel is an ideal _____ for business meetings and weddings.', phrase: 'venue', hint: 'an ideal 后接单数名词 / venue' },
+        { id: 14, unit: 'U3', sentence: 'Online videos are a great way to _____ products to customers.', phrase: 'showcase', hint: 'to 后接动词原形 / showcase' },
+        { id: 15, unit: 'U3', sentence: 'The _____ of e-commerce has reshaped the way business is conducted.', phrase: 'emergence', hint: 'the 后接名词 / emergence' },
+        { id: 16, unit: 'U3', sentence: 'The kindergarten will get a generous _____ of funds.', phrase: 'allocation', hint: 'a generous 后接单数名词 / allocation' },
+        { id: 17, unit: 'U3', sentence: 'Different objectives often _____ with each other in his job.', phrase: 'clash', hint: '主语是复数 objectives，用动词原形 / clash' },
+        { id: 18, unit: 'U3', sentence: 'Bird and butterfly wings are _____ in shape and function.', phrase: 'analogous', hint: 'be 动词后接形容词 / analogous' },
+        { id: 19, unit: 'U3', sentence: 'The Chinese economy enjoys strong _____ despite challenges.', phrase: 'momentum', hint: 'strong 后接名词 / momentum' },
+        { id: 20, unit: 'U3', sentence: 'Bob played a leading role in _____ the company through growth.', phrase: 'navigating', hint: 'in 后接动名词 / navigating' },
+        { id: 21, unit: 'U4', sentence: 'We must maintain the _____ of the building during restoration.', phrase: 'integrity', hint: 'the 后接名词 / integrity' },
+        { id: 22, unit: 'U4', sentence: 'A nurse\'s _____ response communicates respect and caring.', phrase: 'timely', hint: '修饰名词 response，用形容词 / timely' },
+        { id: 23, unit: 'U4', sentence: 'Attempts to preserve animal species and their _____ have succeeded.', phrase: 'habitats', hint: 'their 后接复数名词 / habitats' },
+        { id: 24, unit: 'U4', sentence: 'This project has _____ so much of her time and energy.', phrase: 'consumed', hint: 'has 后接过去分词构成现在完成时 / consumed' },
+        { id: 25, unit: 'U4', sentence: 'Rising _____ leads to consumption based more on wants than needs.', phrase: 'affluence', hint: 'Rising 后接名词 / affluence' },
+        { id: 26, unit: 'U4', sentence: 'Improper _____ of plastics endangers marine species.', phrase: 'disposal', hint: 'Improper 后接名词 / disposal' },
+        { id: 27, unit: 'U4', sentence: 'The signaling system _____ after a heavy rainstorm.', phrase: 'collapsed', hint: '一般过去时 / collapsed' },
+        { id: 28, unit: 'U4', sentence: 'The _____ of natural resources jeopardizes billions of livelihoods.', phrase: 'depletion', hint: 'the 后接名词 / depletion' },
+        { id: 29, unit: 'U4', sentence: 'Birds would _____ if there were no insects to feed on.', phrase: 'perish', hint: 'would 后接动词原形 / perish' },
+        { id: 30, unit: 'U4', sentence: 'Scientists have made _____ achievements in hydrology research.', phrase: 'monumental', hint: '修饰名词 achievements，用形容词 / monumental' },
+        { id: 31, unit: 'U6', sentence: 'These shelves store cell phones and other small _____.', phrase: 'gadgets', hint: 'other small 后接复数名词 / gadgets' },
+        { id: 32, unit: 'U6', sentence: 'The only _____ choice is to embrace the technological revolution.', phrase: 'viable', hint: '修饰名词 choice，用形容词 / viable' },
+        { id: 33, unit: 'U6', sentence: 'Saving species from becoming _____ protects the ecosystem.', phrase: 'extinct', hint: 'becoming 后接形容词 / extinct' },
+        { id: 34, unit: 'U6', sentence: 'The vase has a _____ design that stands out from round shapes.', phrase: 'linear', hint: '修饰名词 design，用形容词 / linear' },
+        { id: 35, unit: 'U6', sentence: 'Automation has improved productivity and _____ time to accomplish work.', phrase: 'slashed', hint: 'and 连接并列谓语，has slashed / slashed' },
+        { id: 36, unit: 'U6', sentence: 'The theater has a(n) _____ system of stage machinery.', phrase: 'intricate', hint: '修饰名词 system，用形容词 / intricate' },
+        { id: 37, unit: 'U6', sentence: 'Reform and opening up _____ an era of economic growth.', phrase: 'inaugurated', hint: '一般过去时 / inaugurated' },
+        { id: 38, unit: 'U6', sentence: 'People need to _____ homes to improve airflow.', phrase: 'ventilate', hint: 'to 后接动词原形 / ventilate' },
+        { id: 39, unit: 'U6', sentence: 'Her therapy uses a(n) _____ of music, relaxation, and imagery.', phrase: 'synthesis', hint: 'a(n) 后接单数名词 / synthesis' },
+        { id: 40, unit: 'U6', sentence: 'This window covering lets you _____ light into the room.', phrase: 'diffuse', hint: 'lets you 后接动词原形 / diffuse' },
+        { id: 41, unit: 'U1', sentence: 'Coal _____ decline in many parts of the world.', phrase: 'is projected to', hint: '主语 Coal（第三人称单数），被动语态 / is projected to' },
+        { id: 42, unit: 'U1', sentence: 'The lifestyle he wanted is _____.', phrase: 'within his grasp', hint: 'be within one\'s grasp 固定搭配 / within his grasp' },
+        { id: 43, unit: 'U1', sentence: 'AI machines _____ the human brain.', phrase: 'are modeled on', hint: '主语 machines（复数），被动语态 / are modeled on' },
+        { id: 44, unit: 'U1', sentence: 'Dennis was able to _____ himself _____ the overweight problem.', phrase: 'rid; of', hint: 'be able to 后接动词原形 / rid; of' },
+        { id: 45, unit: 'U1', sentence: 'I can respond to your questions _____.', phrase: 'within a moment\'s notice', hint: '固定短语 / within a moment\'s notice' },
+        { id: 46, unit: 'U1', sentence: '_____, we require all visitors to sign in.', phrase: 'To that end', hint: '句首大写 / To that end' },
+        { id: 47, unit: 'U1', sentence: 'We shouldn\'t _____ success _____ financial status.', phrase: 'equate; to', hint: 'shouldn\'t 后接动词原形 / equate; to' },
+        { id: 48, unit: 'U1', sentence: '_____ the health risks, smoking makes finding a job harder.', phrase: 'On top of', hint: '句首大写 / On top of' },
+        { id: 49, unit: 'U3', sentence: 'Working from home has slowly _____ across the country.', phrase: 'gained ground', hint: 'has 后接过去分词 / gained ground' },
+        { id: 50, unit: 'U3', sentence: 'Students _____ the summer camp _____ life-changing.', phrase: 'hailed; as', hint: '主语复数，一般过去时 / hailed; as' },
+        { id: 51, unit: 'U3', sentence: 'Experiment with techniques and _____ what you learned _____.', phrase: 'put; into practice', hint: 'and 连接并列祈使句，动词原形 / put; into practice' },
+        { id: 52, unit: 'U3', sentence: 'The artist restored the painting and _____ it _____.', phrase: 'brought; to life', hint: 'and 连接并列谓语，一般过去时 / brought; to life' },
+        { id: 53, unit: 'U3', sentence: 'Environments that are _____ learning increase success.', phrase: 'conducive to', hint: 'be conducive to 固定搭配 / conducive to' },
+        { id: 54, unit: 'U3', sentence: 'Be open to new ways of thinking and _____ what you do.', phrase: 'reflect on', hint: 'and 连接并列祈使句 / reflect on' },
+        { id: 55, unit: 'U3', sentence: 'The budget meeting _____ and members filed out.', phrase: 'drew to a close', hint: '一般过去时 / drew to a close' },
+        { id: 56, unit: 'U3', sentence: 'The Mid-Autumn Festival history can be _____ 3,000 years ago.', phrase: 'traced back to', hint: '被动语态 / traced back to' },
+        { id: 57, unit: 'U4', sentence: 'If goods do not _____ contract specifications, compensation may be requested.', phrase: 'comply with', hint: 'do not 后接动词原形 / comply with' },
+        { id: 58, unit: 'U4', sentence: 'The new chocolate bar _____ than previous products.', phrase: 'fared no better', hint: '主语单数，一般过去时 / fared no better' },
+        { id: 59, unit: 'U4', sentence: 'We should _____ the intake of high-calorie foods.', phrase: 'cut down on', hint: 'should 后接动词原形 / cut down on' },
+        { id: 60, unit: 'U4', sentence: 'Wastewater and CO₂ _____ human life.', phrase: 'pose a threat to', hint: '主语是复数，用动词原形 / pose a threat to' },
+        { id: 61, unit: 'U4', sentence: 'Oil price rise was found to _____ supply and demand changes.', phrase: 'bear no links to', hint: 'to 后接动词原形 / bear no links to' },
+        { id: 62, unit: 'U4', sentence: 'Experiment cost must _____ the potential benefit to society.', phrase: 'be weighed against', hint: 'must 后接被动语态 / be weighed against' },
+        { id: 63, unit: 'U4', sentence: 'We need to _____ natural resources and minimize waste.', phrase: 'economize on', hint: 'to 后接动词原形 / economize on' },
+        { id: 64, unit: 'U4', sentence: 'Your account will _____ if not updated right away.', phrase: 'be in jeopardy', hint: 'will 后接动词原形 / be in jeopardy' },
+        { id: 65, unit: 'U6', sentence: 'Your schedule would quickly _____ with other people\'s agendas.', phrase: 'fill up', hint: 'would 后接动词原形 / fill up' },
+        { id: 66, unit: 'U6', sentence: 'AI is developed and applied _____ large _____.', phrase: 'on a; scale', hint: '固定搭配 / on a large scale' },
+        { id: 67, unit: 'U6', sentence: 'I _____ rates, mortgage, and house insurance.', phrase: 'factored in', hint: '一般过去时 / factored in' },
+        { id: 68, unit: 'U6', sentence: 'Cleaning carpets _____ weekly _____.', phrase: 'on a; basis', hint: '固定搭配 / on a weekly basis' },
+        { id: 69, unit: 'U6', sentence: 'It will take weeks to fully _____ the debris.', phrase: 'clear up', hint: 'to 后接动词原形 / clear up' },
+        { id: 70, unit: 'U6', sentence: 'The data _____ various sources.', phrase: 'was derived from', hint: '主语 data 单数，被动语态 / was derived from' },
+        { id: 71, unit: 'U6', sentence: 'The future does not _____ any single test\'s success.', phrase: 'hinge on', hint: 'does not 后接动词原形 / hinge on' }
+    ];
+
+    let cardStates = [];
+
+    function initPractice() {
+        cardStates = ALL_CARDS.map(() => ({ revealed: false, marked: false }));
+        document.getElementById('practice-intro').style.display = 'block';
+        renderCards();
+        updatePracticeProgress();
+    }
+    function renderCards() {
+        const container = document.getElementById('cards-container');
+        container.innerHTML = '';
+        ALL_CARDS.forEach((card, idx) => {
+            const state = cardStates[idx];
+            const div = document.createElement('div');
+            div.className = 'card-item';
+            div.innerHTML = `
+                <div class="card-english">${card.sentence.replace(/_____/g, '<span class="blank">_____</span>')}</div>
+                <div class="card-answer ${state.revealed ? 'show' : ''}">
+                    <strong style="color:#a5d6a7;">✓ ${card.phrase}</strong><br>${card.unit} · 正确答案
+                </div>
+                <div class="card-hint ${state.revealed ? 'show' : ''}">💡 ${card.hint}</div>
+                <div class="card-actions">
+                    <button class="btn-small btn-reveal" data-idx="${idx}">${state.revealed ? '🔒 隐藏答案' : '👁 查看答案'}</button>
+                    <button class="btn-small btn-mark ${state.marked ? 'marked' : ''}" data-idx="${idx}">${state.marked ? '✅ 已记住' : '⭐ 记住了'}</button>
+                </div>`;
+            container.appendChild(div);
+        });
+        container.querySelectorAll('.btn-reveal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                cardStates[idx].revealed = !cardStates[idx].revealed;
+                const item = e.target.closest('.card-item');
+                item.querySelector('.card-answer').classList.toggle('show');
+                item.querySelector('.card-hint').classList.toggle('show');
+                e.target.textContent = cardStates[idx].revealed ? '🔒 隐藏答案' : '👁 查看答案';
+                updatePracticeProgress();
+            });
+        });
+        container.querySelectorAll('.btn-mark').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                cardStates[idx].marked = !cardStates[idx].marked;
+                e.target.classList.toggle('marked');
+                e.target.textContent = cardStates[idx].marked ? '✅ 已记住' : '⭐ 记住了';
+                updatePracticeProgress();
+            });
+        });
+    }
+    function updatePracticeProgress() {
+        const total = cardStates.length;
+        const revealed = cardStates.filter(s => s.revealed).length;
+        const marked = cardStates.filter(s => s.marked).length;
+        document.getElementById('practice-progress').style.width = `${(revealed / total) * 100}%`;
+        document.getElementById('card-progress').textContent = `${marked}/${total} 已记住`;
+    }
+
+    initPractice();
+})();
+</script>
+</body>
+</html>
