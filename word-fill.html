@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>单词填空 · 模拟考试</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 8px;
+        }
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.13);
+            backdrop-filter: blur(4px);
+            padding: 1.2rem 1rem;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-weight: 500;
+            color: #e9f2f7;
+            text-shadow: 0 2px 6px #0a1e2b;
+            letter-spacing: 1px;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 small {
+            font-size: 0.85rem;
+            font-weight: 300;
+            opacity: 0.8;
+            background: #1f4a5e;
+            padding: 0.3rem 0.8rem;
+            border-radius: 60px;
+            border: 1px solid #8fc3d9;
+        }
+        .progress-bar {
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            height: 8px;
+            margin: 0 0 1rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #fad974;
+            height: 8px;
+            border-radius: 30px;
+            transition: width 0.25s ease;
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        .intro-text {
+            color: #bfdef0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+        }
+        .intro-text strong {
+            color: #fcdb7a;
+        }
+        .btn {
+            background: #fad974;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+            transition: 0.06s linear;
+            cursor: pointer;
+            border: 1px solid #ffe399;
+            letter-spacing: 0.3px;
+            display: inline-block;
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #b3952b;
+        }
+        .btn-secondary {
+            background: #b6d2df;
+            color: #1a3e4e;
+            box-shadow: 0 4px 0 #0d2a36;
+            border-color: #bad7e6;
+        }
+        .question-area {
+            margin-bottom: 1rem;
+        }
+        .question-num {
+            color: #fcdb7a;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .sentence {
+            color: #e9f2f7;
+            font-size: 1rem;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .sentence .blank {
+            color: #fcdb7a;
+            font-weight: 600;
+            border-bottom: 2px dashed #fcdb7a;
+            padding: 0 4px;
+            min-width: 80px;
+            display: inline-block;
+            text-align: center;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .option {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(2px);
+            padding: 12px 14px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,255,255,0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            user-select: none;
+            text-align: center;
+            word-break: break-word;
+        }
+        .option:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .option:active {
+            transform: scale(0.97);
+        }
+        .option.selected {
+            border-color: #f7d44a;
+            background: rgba(247,212,74,0.15);
+            box-shadow: 0 0 0 3px rgba(247,212,74,0.3);
+        }
+        .option.correct {
+            border-color: #4caf50;
+            background: rgba(76,175,80,0.2);
+            color: #a5d6a7;
+        }
+        .option.wrong {
+            border-color: #ef5350;
+            background: rgba(239,83,80,0.2);
+            color: #ef9a9a;
+        }
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .feedback {
+            margin-top: 1rem;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: none;
+        }
+        .feedback.show {
+            display: block;
+        }
+        .feedback.correct-msg {
+            background: rgba(76,175,80,0.2);
+            color: #a5d6a7;
+            border: 1px solid rgba(76,175,80,0.4);
+        }
+        .feedback.wrong-msg {
+            background: rgba(239,83,80,0.2);
+            color: #ef9a9a;
+            border: 1px solid rgba(239,83,80,0.4);
+        }
+        .btn-next {
+            margin-top: 1rem;
+            width: 100%;
+        }
+        .result-area {
+            text-align: center;
+        }
+        .score-display {
+            font-size: 3rem;
+            font-weight: 600;
+            color: #fcdb7a;
+            margin: 0.5rem 0;
+        }
+        .score-label {
+            color: #bfdef0;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .review-list {
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+        .review-item {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #d4eaf5;
+            line-height: 1.5;
+        }
+        .review-item .status {
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .review-item.correct-item .status {
+            color: #a5d6a7;
+        }
+        .review-item.wrong-item .status {
+            color: #ef9a9a;
+        }
+        .review-item .ans {
+            color: #fcdb7a;
+            font-weight: 500;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-bar .score-track {
+            color: #bfdef0;
+            font-size: 0.9rem;
+        }
+        .nav-bar .score-track strong {
+            color: #fcdb7a;
+        }
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 0.8rem 0.6rem;
+                border-radius: 28px;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .sentence {
+                font-size: 0.9rem;
+            }
+            .option {
+                font-size: 0.8rem;
+                padding: 10px 12px;
+            }
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>📖 单词填空 <small>模拟考试</small></h1>
+
+    <div class="screen active" id="screen-intro">
+        <div class="intro-text">
+            <p><strong>考试规则</strong></p>
+            <p>共 <strong>10</strong> 题，每题 <strong>1</strong> 分，共 <strong>10</strong> 分。</p>
+            <p>从 U1、U3、U4、U6 所有单元中随机抽取。</p>
+            <p>选出句子空白处最合适的单词，点击选项作答。</p>
+        </div>
+        <button class="btn" id="btn-start">▶ 开始考试</button>
+    </div>
+
+    <div class="screen" id="screen-quiz">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="question-area">
+            <div class="question-num" id="question-num">第 1 / 10 题</div>
+            <div class="sentence" id="sentence"></div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="btn btn-next" id="btn-next" style="display:none;">下一题 →</button>
+        </div>
+        <div class="nav-bar">
+            <span class="score-track">得分: <strong id="current-score">0</strong> / 10</span>
+            <button class="btn btn-secondary" id="btn-quit" style="font-size:0.8rem;padding:6px 14px;">退出</button>
+        </div>
+    </div>
+
+    <div class="screen" id="screen-result">
+        <div class="result-area">
+            <div class="score-label">你的得分</div>
+            <div class="score-display" id="final-score">0</div>
+            <div class="score-label" id="score-comment"></div>
+            <div class="review-list" id="review-list"></div>
+            <button class="btn" id="btn-restart">🔄 再来一次</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const ALL_QUESTIONS = [
+        // U1
+        { unit: "U1", sentence: "With your generous support, our charity fund will be _____ for continued growth and success for many years to come.", answer: "poised" },
+        { unit: "U1", sentence: "The dock was constructed on a(n) _____ scale with the most modern equipment and the finest materials.", answer: "lavish" },
+        { unit: "U1", sentence: "Advances in mobile phone technology have enabled the rapid development of _____ communication, such as instant messaging and voice chatting.", answer: "instantaneous" },
+        { unit: "U1", sentence: "Computers, vehicles, paintings, furniture, etc. are all _____ assets that are characterized by their movability.", answer: "tangible" },
+        { unit: "U1", sentence: "Students are a fairly adaptable community and their strength lies in their teamwork along with the ability to overcome _____ together.", answer: "hurdles" },
+        { unit: "U1", sentence: "For the convenience of drivers, China rolled out digital driver's licenses across the country amid efforts to _____ services.", answer: "streamline" },
+        { unit: "U1", sentence: "Studies have shown that long-term confinement is _____ to the physical and psychological well-being of animals.", answer: "detrimental" },
+        { unit: "U1", sentence: "The new museum is designed in a manner to _____ the interest of children and young adults in science and technology.", answer: "evoke" },
+        { unit: "U1", sentence: "This study was conducted to test the _____ that exposure to urban air pollution contributes to the development of chronic lung diseases.", answer: "hypothesis" },
+        { unit: "U1", sentence: "If your stress is _____ into more serious issues, you should reach out to a licensed professional for help.", answer: "escalating" },
+        // U3
+        { unit: "U3", sentence: "During the discussion, the professor was mostly listening and only occasionally gave a few remarks to bring _____ to the issue being discussed.", answer: "clarity" },
+        { unit: "U3", sentence: "Today many governments around the world are _____ to invest in technology to tackle social and environmental problems.", answer: "keen" },
+        { unit: "U3", sentence: "Situated in the heart of the town, the hotel is an ideal _____ for business meetings, weddings, and other large group events.", answer: "venue" },
+        { unit: "U3", sentence: "For small businesses, online videos are a great way to _____ their products or services to new and existing customers.", answer: "showcase" },
+        { unit: "U3", sentence: "The _____ and rapid growth of e-commerce has reshaped the way business is conducted, making online shopping an integral part of our life.", answer: "emergence" },
+        { unit: "U3", sentence: "The new kindergarten will get a generous _____ of funds to improve its outdoor facilities.", answer: "allocation" },
+        { unit: "U3", sentence: "His job involves deciding on matters with different objectives that often _____ with each other, e.g., company profits vs. investor returns.", answer: "clash" },
+        { unit: "U3", sentence: "The structures of the wings of a bird and a butterfly are _____ because they are basically similar in shape and function.", answer: "analogous" },
+        { unit: "U3", sentence: "Despite challenges, the Chinese economy continues to enjoy strong _____ and remains a crucial contributor to world economic growth.", answer: "momentum" },
+        { unit: "U3", sentence: "As the company's first CFO for many years, Bob has played a leading role in _____ the company through a significant growth period.", answer: "navigating" },
+        // U4
+        { unit: "U4", sentence: "During the restoration, there were many strict conservation guidelines to which we had to adhere in order to maintain the _____ of the building.", answer: "integrity" },
+        { unit: "U4", sentence: "Research indicates that a nurse's _____ response to a call bell communicates respect and caring and hence contributes to patient satisfaction.", answer: "timely" },
+        { unit: "U4", sentence: "The air and rivers in this area are getting cleaner, and attempts to preserve animal species and their _____ have been mostly successful.", answer: "habitats" },
+        { unit: "U4", sentence: "This project has _____ so much of her time and energy that she needs a rest after finishing it.", answer: "consumed" },
+        { unit: "U4", sentence: "Due to rising _____ and the availability of a wider range of choices, consumption is now based more on what one wants, rather than what one needs.", answer: "affluence" },
+        { unit: "U4", sentence: "Improper _____ of plastics into the oceans endangers the marine species and subsequently human lives.", answer: "disposal" },
+        { unit: "U4", sentence: "The movement of trains along the line was badly affected after the signaling system _____ following a heavy rainstorm.", answer: "collapsed" },
+        { unit: "U4", sentence: "The _____ of natural resources is a global environmental issue that jeopardizes the livelihoods of billions of people on our planet.", answer: "depletion" },
+        { unit: "U4", sentence: "Insects are important sources of food for other animals. Hundreds of species of birds would _____ if there were no insects to feed on.", answer: "perish" },
+        { unit: "U4", sentence: "Scientists in China have carried out advanced research on hydrology and water resources of inland rivers, and have made _____ achievements in recent years.", answer: "monumental" },
+        // U6
+        { unit: "U6", sentence: "These shelves are perfect for storing your cell phone, alarm clock, or other small _____ that tend to gather in the bedroom.", answer: "gadgets" },
+        { unit: "U6", sentence: "The world is now facing a new industrial and technological revolution, and the only _____ choice for us is to embrace it, not reject it.", answer: "viable" },
+        { unit: "U6", sentence: "Saving endangered species from becoming _____ and protecting their habitats is crucial for the balance of the ecosystem.", answer: "extinct" },
+        { unit: "U6", sentence: "The _____ design of the vase looks simple and unique, which makes it stand out from other vases with traditional round shapes.", answer: "linear" },
+        { unit: "U6", sentence: "With automation, we have greatly improved productivity and _____ the time to accomplish the work.", answer: "slashed" },
+        { unit: "U6", sentence: "The theater is equipped with a(n) _____ system of stage machinery to meet the demands of even the most complex show.", answer: "intricate" },
+        { unit: "U6", sentence: "China's reform and opening up beginning in the late 1970s _____ an era of sustained economic growth and rising living standards in the country.", answer: "inaugurated" },
+        { unit: "U6", sentence: "People now understand the need to _____ their homes to improve airflow and get rid of viruses that may cause disease.", answer: "ventilate" },
+        { unit: "U6", sentence: "Using a(n) _____ of music, relaxation, and imagery, her innovative therapy has brought significant emotional and physical healing to many.", answer: "synthesis" },
+        { unit: "U6", sentence: "With this window covering, you can have full control over how much light is let in, whether the goal is to _____ light into the room or to block it out.", answer: "diffuse" }
+    ];
+
+    const TOTAL_QUESTIONS = 10;
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let userAnswers = [];
+
+    const screenIntro = document.getElementById('screen-intro');
+    const screenQuiz = document.getElementById('screen-quiz');
+    const screenResult = document.getElementById('screen-result');
+    const sentenceEl = document.getElementById('sentence');
+    const optionsEl = document.getElementById('options');
+    const questionNumEl = document.getElementById('question-num');
+    const progressFill = document.getElementById('progress-fill');
+    const currentScoreEl = document.getElementById('current-score');
+    const feedbackEl = document.getElementById('feedback');
+    const btnNext = document.getElementById('btn-next');
+    const finalScoreEl = document.getElementById('final-score');
+    const scoreCommentEl = document.getElementById('score-comment');
+    const reviewListEl = document.getElementById('review-list');
+
+    function shuffleArray(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    function renderBlank(sentence) {
+        return sentence.replace(/_____/g, '<span class="blank">_____</span>');
+    }
+
+    function generateOptions(correctAnswer, allAnswers) {
+        const pool = allAnswers.filter(a => a !== correctAnswer);
+        const shuffledPool = shuffleArray(pool);
+        const distractors = shuffledPool.slice(0, 4);
+        const opts = [...distractors, correctAnswer];
+        return shuffleArray(opts);
+    }
+
+    function showScreen(screen) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        screen.classList.add('active');
+    }
+
+    function startGame() {
+        const shuffled = shuffleArray(ALL_QUESTIONS);
+        currentQuestions = shuffled.slice(0, TOTAL_QUESTIONS);
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+        userAnswers = [];
+        currentScoreEl.textContent = '0';
+        showScreen(screenQuiz);
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = currentQuestions[currentIndex];
+        const allAnswers = ALL_QUESTIONS.map(item => item.answer);
+        const options = generateOptions(q.answer, allAnswers);
+
+        questionNumEl.textContent = `第 ${currentIndex + 1} / ${TOTAL_QUESTIONS} 题 (${q.unit})`;
+        sentenceEl.innerHTML = renderBlank(q.sentence);
+        progressFill.style.width = `${(currentIndex / TOTAL_QUESTIONS) * 100}%`;
+        feedbackEl.className = 'feedback';
+        feedbackEl.innerHTML = '';
+        btnNext.style.display = 'none';
+
+        optionsEl.innerHTML = '';
+        options.forEach((opt) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.textContent = opt;
+            div.dataset.value = opt;
+            div.addEventListener('click', () => selectOption(div, opt, q.answer));
+            optionsEl.appendChild(div);
+        });
+    }
+
+    function selectOption(el, selected, correct) {
+        if (answered) return;
+        answered = true;
+
+        const allOpts = optionsEl.querySelectorAll('.option');
+        allOpts.forEach(o => {
+            o.classList.add('disabled');
+            if (o.dataset.value === correct) {
+                o.classList.add('correct');
+            }
+        });
+
+        userAnswers.push({ question: currentQuestions[currentIndex].sentence, selected, correct, unit: currentQuestions[currentIndex].unit });
+
+        if (selected === correct) {
+            score++;
+            el.classList.add('correct');
+            feedbackEl.className = 'feedback show correct-msg';
+            feedbackEl.innerHTML = `✅ 正确！<br>答案：<span style="color:#fcdb7a;font-weight:600;">${correct}</span>`;
+        } else {
+            el.classList.add('wrong');
+            feedbackEl.className = 'feedback show wrong-msg';
+            feedbackEl.innerHTML = `❌ 错误！<br>你的答案：<span style="color:#ef9a9a;font-weight:600;">${selected}</span><br>正确答案：<span style="color:#a5d6a7;font-weight:600;">${correct}</span>`;
+        }
+
+        currentScoreEl.textContent = score;
+        btnNext.style.display = 'inline-block';
+        progressFill.style.width = `${((currentIndex + 1) / TOTAL_QUESTIONS) * 100}%`;
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex >= TOTAL_QUESTIONS) {
+            showResult();
+        } else {
+            loadQuestion();
+        }
+    }
+
+    function showResult() {
+        showScreen(screenResult);
+        finalScoreEl.textContent = `${score} / ${TOTAL_QUESTIONS}`;
+
+        let comment = '';
+        if (score === TOTAL_QUESTIONS) comment = '🎉 完美全对！太厉害了！';
+        else if (score >= 8) comment = '👍 很不错！继续加油！';
+        else if (score >= 6) comment = '✊ 及格啦，再复习一下错题吧！';
+        else comment = '💪 继续努力，多练习就能提高！';
+        scoreCommentEl.textContent = comment;
+
+        reviewListEl.innerHTML = '';
+        userAnswers.forEach((ua) => {
+            const div = document.createElement('div');
+            div.className = 'review-item ' + (ua.selected === ua.correct ? 'correct-item' : 'wrong-item');
+            const status = ua.selected === ua.correct ? '✓' : '✗';
+            const sentenceShort = ua.question.replace(/_____/g, '<span style="color:#fcdb7a;font-weight:600;">_____</span>');
+            div.innerHTML = `<span class="status">${status}</span>[${ua.unit}] ${sentenceShort}<br>你的：<span class="ans">${ua.selected}</span> | 正确：<span class="ans">${ua.correct}</span>`;
+            reviewListEl.appendChild(div);
+        });
+    }
+
+    document.getElementById('btn-start').addEventListener('click', startGame);
+    btnNext.addEventListener('click', nextQuestion);
+    document.getElementById('btn-restart').addEventListener('click', startGame);
+    document.getElementById('btn-quit').addEventListener('click', () => {
+        showScreen(screenIntro);
+    });
+})();
+</script>
+</body>
+</html>
