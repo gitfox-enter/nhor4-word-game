@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>短语记忆 · 第六单元</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh; min-height: 100dvh;
+            display: flex; justify-content: center; align-items: flex-start;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 8px;
+        }
+        .game-container {
+            max-width: 800px; width: 100%;
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(4px);
+            padding: 1.2rem 1rem;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-weight: 500; color: #e9f2f7;
+            text-shadow: 0 2px 6px #0a1e2b;
+            letter-spacing: 1px;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1rem; font-size: 1.3rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        h1 small {
+            font-size: 0.85rem; font-weight: 300; opacity: 0.8;
+            background: #1f4a5e; padding: 0.3rem 0.8rem;
+            border-radius: 60px; border: 1px solid #8fc3d9;
+        }
+        .card-item {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .card-english {
+            color: #e9f2f7; font-size: 0.95rem;
+            line-height: 1.6; margin-bottom: 0.8rem; font-weight: 500;
+        }
+        .card-english .blank {
+            color: #fcdb7a; font-weight: 600;
+            border-bottom: 2px dashed #fcdb7a;
+            padding: 0 4px; min-width: 60px;
+            display: inline-block; text-align: center;
+        }
+        .card-answer {
+            color: #a5d6a7; font-size: 0.9rem;
+            line-height: 1.6; margin-bottom: 0.5rem;
+            padding: 0.8rem; background: rgba(0,0,0,0.2);
+            border-radius: 16px; display: none;
+        }
+        .card-answer.show { display: block; }
+        .card-hint {
+            color: #8fc3d9; font-size: 0.8rem;
+            line-height: 1.4; margin-bottom: 0.6rem;
+            padding: 6px 10px; background: rgba(255,255,255,0.05);
+            border-radius: 10px; display: none;
+        }
+        .card-hint.show { display: block; }
+        .card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-small {
+            padding: 6px 14px; font-size: 0.8rem;
+            border-radius: 40px; font-weight: 600;
+            cursor: pointer; border: none; transition: 0.1s;
+        }
+        .btn-reveal { background: #264e63; color: #bfdef0; border: 1px solid #578aa3; }
+        .btn-mark { background: #1d4d4b; color: #a5d6a7; border: 1px solid #479f9b; }
+        .btn-mark.marked { background: #fad974; color: #1d3f4a; border-color: #ffe399; }
+        .progress-bar {
+            background: rgba(0,0,0,0.3); border-radius: 30px;
+            height: 6px; margin: 0 0 1rem; overflow: hidden;
+        }
+        .progress-fill {
+            background: #fad974; height: 6px; border-radius: 30px;
+            transition: width 0.25s ease;
+        }
+        .nav-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 1rem; padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-bar .progress-text { color: #bfdef0; font-size: 0.9rem; }
+        .nav-bar .progress-text strong { color: #fcdb7a; }
+        .back-link {
+            color: #bfdef0; font-size: 0.85rem;
+            text-decoration: none; margin-bottom: 0.5rem; display: inline-block;
+        }
+        .back-link:hover { color: #fcdb7a; }
+        @media (max-width: 480px) {
+            .game-container { padding: 0.8rem 0.6rem; border-radius: 28px; }
+            h1 { font-size: 1.1rem; }
+            .card-english { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <a class="back-link" href="index.html">← 返回首页</a>
+    <h1>📝 短语记忆 <small>U6 · 17句</small></h1>
+
+    <div class="progress-bar"><div class="progress-fill" id="practice-progress" style="width:0%"></div></div>
+    <div id="cards-container"></div>
+    <div class="nav-bar">
+        <span class="progress-text">进度: <strong id="card-progress">0/0</strong></span>
+    </div>
+</div>
+
+<script>
+(function(){
+    const ALL_CARDS = [
+        { id: 1, unit: 'U6', type: 'Expressions', sentence: 'If you say yes to every request and invitation, your schedule would quickly _____ with other people\'s agendas.', phrase: 'fill up', hint: 'would 后接动词原形 / fill up' },
+        { id: 2, unit: 'U6', type: 'Expressions', sentence: 'I suppose many jobs we are doing now will disappear if AI is developed and applied _____ large _____.', phrase: 'on a; scale', hint: '固定搭配 / on a large scale' },
+        { id: 3, unit: 'U6', type: 'Expressions', sentence: 'I would like to purchase my own home. I _____ rates, mortgage, and house insurance and found that the monthly payment is about the same as the rent I currently pay.', phrase: 'factored in', hint: '一般过去时 / factored in' },
+        { id: 4, unit: 'U6', type: 'Expressions', sentence: 'As one of the preferred floor coverings, carpets often require regular care in the form of vacuuming and cleaning _____ weekly _____.', phrase: 'on a; basis', hint: '固定搭配 / on a weekly basis' },
+        { id: 5, unit: 'U6', type: 'Expressions', sentence: 'The storm caused widespread damage throughout our city, and it\'s going to take weeks for us to fully _____ the debris.', phrase: 'clear up', hint: 'to 后接动词原形 / clear up' },
+        { id: 6, unit: 'U6', type: 'Expressions', sentence: 'The data used for this analysis _____ various sources and assumed to be correct and reliable, but it has not been independently verified.', phrase: 'was derived from', hint: '主语 data 单数，被动语态 / was derived from' },
+        { id: 7, unit: 'U6', type: 'Expressions', sentence: 'The future of our research program does not _____ the success or failure of any single test, but the results of many tests over several years.', phrase: 'hinge on', hint: 'does not 后接动词原形 / hinge on' },
+        { id: 8, unit: 'U6', type: 'Words', sentence: 'These shelves are perfect for storing your cell phone, alarm clock, or other small _____ that tend to gather in the bedroom.', phrase: 'gadgets', hint: 'other small 后接复数名词 / gadgets' },
+        { id: 9, unit: 'U6', type: 'Words', sentence: 'The world is now facing a new industrial and technological revolution, and the only _____ choice for us is to embrace it, not reject it.', phrase: 'viable', hint: '修饰名词 choice，用形容词 / viable' },
+        { id: 10, unit: 'U6', type: 'Words', sentence: 'Saving endangered species from becoming _____ and protecting their habitats is crucial for the balance of the ecosystem.', phrase: 'extinct', hint: 'becoming 后接形容词 / extinct' },
+        { id: 11, unit: 'U6', type: 'Words', sentence: 'The _____ design of the vase looks simple and unique, which makes it stand out from other vases with traditional round shapes.', phrase: 'linear', hint: '修饰名词 design，用形容词 / linear' },
+        { id: 12, unit: 'U6', type: 'Words', sentence: 'With automation, we have greatly improved productivity and _____ the time to accomplish the work.', phrase: 'slashed', hint: 'and 连接并列谓语，has slashed / slashed' },
+        { id: 13, unit: 'U6', type: 'Words', sentence: 'The theater is equipped with a(n) _____ system of stage machinery to meet the demands of even the most complex show.', phrase: 'intricate', hint: '修饰名词 system，用形容词 / intricate' },
+        { id: 14, unit: 'U6', type: 'Words', sentence: 'China\'s reform and opening up beginning in the late 1970s _____ an era of sustained economic growth and rising living standards in the country.', phrase: 'inaugurated', hint: '一般过去时 / inaugurated' },
+        { id: 15, unit: 'U6', type: 'Words', sentence: 'People now understand the need to _____ their homes to improve airflow and get rid of viruses that may cause disease.', phrase: 'ventilate', hint: 'to 后接动词原形 / ventilate' },
+        { id: 16, unit: 'U6', type: 'Words', sentence: 'Using a(n) _____ of music, relaxation, and imagery, her innovative therapy has brought significant emotional and physical healing to many.', phrase: 'synthesis', hint: 'a(n) 后接单数名词 / synthesis' },
+        { id: 17, unit: 'U6', type: 'Words', sentence: 'With this window covering, you can have full control over how much light is let in, whether the goal is to _____ light into the room or to block it out.', phrase: 'diffuse', hint: 'lets you 后接动词原形 / diffuse' }
+    ];
+
+    let cardStates = ALL_CARDS.map(() => ({ revealed: false, marked: false }));
+    const cardsContainer = document.getElementById('cards-container');
+    const progressFill = document.getElementById('practice-progress');
+    const cardProgress = document.getElementById('card-progress');
+
+    function renderCards() {
+        cardsContainer.innerHTML = '';
+        ALL_CARDS.forEach((card, idx) => {
+            const state = cardStates[idx];
+            const div = document.createElement('div');
+            div.className = 'card-item';
+            div.innerHTML = `
+                <div class="card-english">${card.sentence.replace(/_____/g, '<span class="blank">_____</span>')}</div>
+                <div class="card-answer ${state.revealed ? 'show' : ''}" id="answer-${idx}">
+                    <strong>✓ ${card.phrase}</strong> · ${card.type}
+                </div>
+                <div class="card-hint ${state.revealed ? 'show' : ''}" id="hint-${idx}">💡 ${card.hint}</div>
+                <div class="card-actions">
+                    <button class="btn-small btn-reveal" data-idx="${idx}">${state.revealed ? '🔒 隐藏答案' : '👁 查看答案'}</button>
+                    <button class="btn-small btn-mark ${state.marked ? 'marked' : ''}" data-idx="${idx}">${state.marked ? '✅ 已记住' : '⭐ 记住了'}</button>
+                </div>`;
+            cardsContainer.appendChild(div);
+        });
+        cardsContainer.querySelectorAll('.btn-reveal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                cardStates[idx].revealed = !cardStates[idx].revealed;
+                document.getElementById(`answer-${idx}`).classList.toggle('show');
+                document.getElementById(`hint-${idx}`).classList.toggle('show');
+                e.target.textContent = cardStates[idx].revealed ? '🔒 隐藏答案' : '👁 查看答案';
+                updateProgress();
+            });
+        });
+        cardsContainer.querySelectorAll('.btn-mark').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                cardStates[idx].marked = !cardStates[idx].marked;
+                e.target.classList.toggle('marked');
+                e.target.textContent = cardStates[idx].marked ? '✅ 已记住' : '⭐ 记住了';
+                updateProgress();
+            });
+        });
+    }
+    function updateProgress() {
+        const total = cardStates.length;
+        const revealed = cardStates.filter(s => s.revealed).length;
+        const marked = cardStates.filter(s => s.marked).length;
+        progressFill.style.width = `${(revealed / total) * 100}%`;
+        cardProgress.textContent = `${marked}/${total} 已记住`;
+    }
+    renderCards();
+    updateProgress();
+})();
+</script>
+</body>
+</html>
