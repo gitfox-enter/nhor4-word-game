@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>翻译题 · 对照记忆卡片</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 12px;
+        }
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.13);
+            backdrop-filter: blur(4px);
+            padding: 1.2rem 1rem;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-weight: 500;
+            color: #e9f2f7;
+            text-shadow: 0 2px 6px #0a1e2b;
+            letter-spacing: 1px;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 small {
+            font-size: 0.85rem;
+            font-weight: 300;
+            opacity: 0.8;
+            background: #1f4a5e;
+            padding: 0.3rem 0.8rem;
+            border-radius: 60px;
+            border: 1px solid #8fc3d9;
+        }
+        .level-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+        .level-btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #bfdef0;
+            cursor: pointer;
+            transition: 0.15s;
+            backdrop-filter: blur(2px);
+        }
+        .level-btn:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .level-btn.active {
+            background: #fad974;
+            border-color: #ffe399;
+            color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+        }
+        .screen {
+            display: none;
+        }
+        .screen.active {
+            display: block;
+        }
+        .intro-text {
+            color: #bfdef0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+        }
+        .intro-text strong {
+            color: #fcdb7a;
+        }
+        .btn {
+            background: #fad974;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+            transition: 0.06s linear;
+            cursor: pointer;
+            border: 1px solid #ffe399;
+            letter-spacing: 0.3px;
+            display: inline-block;
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #b3952b;
+        }
+        .btn-secondary {
+            background: #b6d2df;
+            color: #1a3e4e;
+            box-shadow: 0 4px 0 #0d2a36;
+            border-color: #bad7e6;
+        }
+        .card-item {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+        .card-item:hover {
+            border-color: rgba(255,255,255,0.2);
+        }
+        .card-english {
+            color: #e9f2f7;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+        }
+        .card-chinese {
+            color: #fcdb7a;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            display: none;
+        }
+        .card-chinese.show {
+            display: block;
+        }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: 0.1s;
+        }
+        .btn-reveal {
+            background: #264e63;
+            color: #bfdef0;
+            border: 1px solid #578aa3;
+        }
+        .btn-mark {
+            background: #1d4d4b;
+            color: #a5d6a7;
+            border: 1px solid #479f9b;
+        }
+        .btn-mark.marked {
+            background: #fad974;
+            color: #1d3f4a;
+            border-color: #ffe399;
+        }
+        .progress-bar {
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            height: 6px;
+            margin: 0 0 1rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #fad974;
+            height: 6px;
+            border-radius: 30px;
+            transition: width 0.25s ease;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-bar .progress-text {
+            color: #bfdef0;
+            font-size: 0.9rem;
+        }
+        .nav-bar .progress-text strong {
+            color: #fcdb7a;
+        }
+        .result-area {
+            text-align: center;
+        }
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #fcdb7a;
+            margin: 0.5rem 0;
+        }
+        .score-label {
+            color: #bfdef0;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .review-list {
+            text-align: left;
+            max-height: 350px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+        .review-item {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #d4eaf5;
+            line-height: 1.5;
+        }
+        .review-item .status {
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .review-item.ok .status {
+            color: #a5d6a7;
+        }
+        .review-item.review .status {
+            color: #fcdb7a;
+        }
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 0.8rem 0.6rem;
+                border-radius: 28px;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .card-english, .card-chinese {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>📖 翻译题 <small>对照记忆卡片</small></h1>
+
+    <div class="level-grid" id="levelGrid"></div>
+
+    <!-- Intro Screen -->
+    <div class="screen active" id="screen-intro">
+        <div class="intro-text">
+            <p><strong>使用方法</strong></p>
+            <p>选择上方单元，先自己尝试翻译英文原文。</p>
+            <p>点击<strong>"查看翻译"</strong>对照标准答案。</p>
+            <p>会了就点<strong>"记住了"</strong>，不熟点<strong>"需复习"</strong>。</p>
+            <p>全部看完后进入<strong>模拟考试</strong>。</p>
+        </div>
+        <button class="btn" id="btn-start">▶ 开始学习</button>
+    </div>
+
+    <!-- Cards Screen -->
+    <div class="screen" id="screen-cards">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div id="cards-container"></div>
+        <div class="nav-bar">
+            <span class="progress-text">进度: <strong id="card-progress">0/0</strong></span>
+            <button class="btn btn-secondary" id="btn-exam" style="display:none;">📝 进入模拟考试</button>
+        </div>
+    </div>
+
+    <!-- Exam Screen -->
+    <div class="screen" id="screen-exam">
+        <div class="progress-bar"><div class="progress-fill" id="exam-progress" style="width:0%"></div></div>
+        <div id="exam-container"></div>
+        <div class="nav-bar">
+            <span class="progress-text">进度: <strong id="exam-text">0/0</strong></span>
+            <button class="btn btn-secondary" id="btn-back">⬅ 返回卡片</button>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="screen" id="screen-result">
+        <div class="result-area">
+            <div class="score-label">复习统计</div>
+            <div class="score-display" id="result-stats">0/0</div>
+            <div class="score-label" id="result-comment"></div>
+            <div class="review-list" id="result-list"></div>
+            <button class="btn" id="btn-restart">🔄 重新开始</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const LEVELS = [
+        {
+            id: 1, title: '城乡一体化 (U1)', unit: 'U1',
+            sentences: [
+                { english: "Urban-rural integration is a new stage in China's development toward modernization and urbanization.", chinese: "城乡一体化是我国现代化和城市化发展的一个新阶段。" },
+                { english: "It aims to eliminate the urban-rural dual economic structure through integrated planning for urban and rural development, and through institutional reform and policy adjustment, so that the urban and rural areas will achieve policy equality and complement each other in the mode of industrial development, enabling rural residents to enjoy the same civilization and welfare as urban residents.", chinese: "其目的是通过对城乡发展进行统筹规划，并通过体制改革和政策调整，破除城乡二元经济结构，从而实现城乡在政策上平等、在产业发展模式上互补，让农村居民享受到与城镇居民同样的文明和福利。" },
+                { english: "Only by greatly promoting urban-rural integration can the whole urban and rural economy of our country develop comprehensively and sustainably.", chinese: "只有大力推进城乡一体化，我国整个城乡经济才能实现全面、可持续发展。" }
+            ]
+        },
+        {
+            id: 2, title: '生态保护 (U4)', unit: 'U4',
+            sentences: [
+                { english: "Since the reform and opening up, the Chinese government has taken a series of measures to improve the ecological environment and protect biodiversity.", chinese: "改革开放以来，中国政府采取了一系列改善生态环境、保护生物多样性的措施。" },
+                { english: "Many key ecological projects have been advanced or implemented, and a large number of nature reserves, ecological demonstration zones and forest parks have been successively established.", chinese: "许多重点生态工程得到推进或实施，一大批自然保护区、生态示范区和森林公园先后被设立。" },
+                { english: "In the future, we should further enhance the diversity, stability, and sustainability of our ecosystems. We should uphold and act on the principle that lucid waters and lush mountains are invaluable assets, and remember to maintain the harmony between humanity and nature when planning our development.", chinese: "今后，我们还需要进一步提升生态系统的多样性、稳定性、持续性，牢固树立和践行绿水青山就是金山银山的理念，站在人与自然和谐共生的高度谋划发展。" }
+            ]
+        },
+        {
+            id: 3, title: '国际传播 (U3)', unit: 'U3',
+            sentences: [
+                { english: "With the rapid development of our society and economy, China is playing an increasingly important role in the international arena.", chinese: "随着社会和经济的飞速发展，中国在国际舞台上发挥着越来越大的作用。" },
+                { english: "In this context, we should stay firmly rooted in Chinese culture, accelerate the establishment of China's discourse and narrative systems. We should better present China to the world, make China's voice better heard, and present China as a country worthy of friendship, trust, and respect.", chinese: "在此背景下，我们必须坚守中华文化立场，加快构建中国话语和中国叙事体系，讲好中国故事、传播好中国声音，展现可信、可爱、可敬的中国形象。" },
+                { english: "We should strengthen our capabilities for international communications, strive to make our communications more effective, and establish China's voice in international affairs so that it is commensurate with our composite national strength and international status. We should deepen exchanges and mutual learning with other civilizations and better present Chinese culture to the world.", chinese: "加强国际传播能力建设，全面提升国际传播效能，形成同我国综合国力和国际地位相匹配的国际话语权。深化文明交流互鉴，推动中华文化更好走向世界。" }
+            ]
+        },
+        {
+            id: 4, title: '博鳌论坛 (U6)', unit: 'U6',
+            sentences: [
+                { english: "Boao Forum for Asia (BFA) is an international organization headquartered in Boao Town, Hainan Province, China.", chinese: "博鳌亚洲论坛(Boao Forum for Asia, or BFA)是一个总部设在中国海南省博鳌镇的国际组织。" },
+                { english: "Jointly initiated by 29 member states, it was officially founded in 2001. BFA holds conferences in Boao on an annual basis, and has now become a high-level dialogue platform for political, business, and academic leaders from Asia and other continents to discuss key Asian and global issues.", chinese: "它由29个成员国共同发起，于2001年正式成立。论坛每年定期在博鳌举行会议，目前已成为亚洲以及其他洲政界、工商界和学术界领袖商讨亚洲及全球关键问题的高层次对话平台。" },
+                { english: "In the new historical period, BFA will continue to contribute actively to the peace, prosperity, and sustainable development of Asia and the world.", chinese: "在新的历史时期，博鳌亚洲论坛将继续为亚洲及世界和平、繁荣与可持续发展做出积极贡献。" }
+            ]
+        }
+    ];
+
+    let currentLevelIndex = 0;
+    let cardStates = []; // {revealed: false, marked: false}
+    let examMode = false;
+
+    const levelGrid = document.getElementById('levelGrid');
+    const screenIntro = document.getElementById('screen-intro');
+    const screenCards = document.getElementById('screen-cards');
+    const screenExam = document.getElementById('screen-exam');
+    const screenResult = document.getElementById('screen-result');
+    const cardsContainer = document.getElementById('cards-container');
+    const examContainer = document.getElementById('exam-container');
+    const progressFill = document.getElementById('progress-fill');
+    const examProgress = document.getElementById('exam-progress');
+    const cardProgress = document.getElementById('card-progress');
+    const examText = document.getElementById('exam-text');
+    const btnExam = document.getElementById('btn-exam');
+
+    function showScreen(screen) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        screen.classList.add('active');
+    }
+
+    function renderLevels() {
+        levelGrid.innerHTML = '';
+        LEVELS.forEach((level, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'level-btn' + (idx === currentLevelIndex ? ' active' : '');
+            btn.textContent = level.title;
+            btn.addEventListener('click', () => {
+                currentLevelIndex = idx;
+                renderLevels();
+                startCards();
+            });
+            levelGrid.appendChild(btn);
+        });
+    }
+
+    function startCards() {
+        const level = LEVELS[currentLevelIndex];
+        cardStates = level.sentences.map(() => ({ revealed: false, marked: false }));
+        examMode = false;
+        showScreen(screenCards);
+        renderCards();
+        updateProgress();
+    }
+
+    function renderCards() {
+        const level = LEVELS[currentLevelIndex];
+        cardsContainer.innerHTML = '';
+        level.sentences.forEach((s, idx) => {
+            const state = cardStates[idx];
+            const div = document.createElement('div');
+            div.className = 'card-item';
+            div.innerHTML = `
+                <div class="card-english">${s.english}</div>
+                <div class="card-chinese ${state.revealed ? 'show' : ''}" id="chinese-${idx}">${s.chinese}</div>
+                <div class="card-actions">
+                    <button class="btn-small btn-reveal" data-idx="${idx}">${state.revealed ? '🔒 隐藏翻译' : '👁 查看翻译'}</button>
+                    <button class="btn-small btn-mark ${state.marked ? 'marked' : ''}" data-idx="${idx}">${state.marked ? '✅ 已记住' : '⭐ 记住了'}</button>
+                </div>
+            `;
+            cardsContainer.appendChild(div);
+        });
+
+        // Bind events
+        cardsContainer.querySelectorAll('.btn-reveal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                cardStates[idx].revealed = !cardStates[idx].revealed;
+                const chinese = document.getElementById(`chinese-${idx}`);
+                chinese.classList.toggle('show');
+                e.target.textContent = cardStates[idx].revealed ? '🔒 隐藏翻译' : '👁 查看翻译';
+                updateProgress();
+            });
+        });
+
+        cardsContainer.querySelectorAll('.btn-mark').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                cardStates[idx].marked = !cardStates[idx].marked;
+                e.target.classList.toggle('marked');
+                e.target.textContent = cardStates[idx].marked ? '✅ 已记住' : '⭐ 记住了';
+                updateProgress();
+            });
+        });
+
+        // Show exam button if all revealed
+        const allRevealed = cardStates.every(s => s.revealed);
+        btnExam.style.display = allRevealed ? 'inline-block' : 'none';
+    }
+
+    function updateProgress() {
+        const total = cardStates.length;
+        const revealed = cardStates.filter(s => s.revealed).length;
+        const marked = cardStates.filter(s => s.marked).length;
+        progressFill.style.width = `${(revealed / total) * 100}%`;
+        cardProgress.textContent = `${marked}/${total} 已记住`;
+    }
+
+    function startExam() {
+        examMode = true;
+        showScreen(screenExam);
+        const level = LEVELS[currentLevelIndex];
+        examContainer.innerHTML = '';
+        level.sentences.forEach((s, idx) => {
+            const div = document.createElement('div');
+            div.className = 'card-item';
+            div.innerHTML = `
+                <div class="card-english">${s.english}</div>
+                <div class="card-chinese" id="exam-chinese-${idx}" style="display:none;">${s.chinese}</div>
+                <div class="card-actions">
+                    <button class="btn-small btn-reveal" data-idx="${idx}">👁 查看翻译</button>
+                </div>
+            `;
+            examContainer.appendChild(div);
+        });
+
+        examContainer.querySelectorAll('.btn-reveal').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.dataset.idx);
+                const chinese = document.getElementById(`exam-chinese-${idx}`);
+                chinese.style.display = 'block';
+                e.target.style.display = 'none';
+                updateExamProgress();
+            });
+        });
+        updateExamProgress();
+    }
+
+    function updateExamProgress() {
+        const total = LEVELS[currentLevelIndex].sentences.length;
+        const revealed = examContainer.querySelectorAll('.card-chinese[style*="block"]').length;
+        examProgress.style.width = `${(revealed / total) * 100}%`;
+        examText.textContent = `${revealed}/${total}`;
+    }
+
+    function showResult() {
+        showScreen(screenResult);
+        const total = cardStates.length;
+        const marked = cardStates.filter(s => s.marked).length;
+        const needReview = total - marked;
+        document.getElementById('result-stats').textContent = `${marked}/${total}`;
+        document.getElementById('result-comment').textContent = needReview === 0 ? '🎉 全部记住了！' : `还有 ${needReview} 句需要复习`;
+
+        const list = document.getElementById('result-list');
+        list.innerHTML = '';
+        LEVELS[currentLevelIndex].sentences.forEach((s, idx) => {
+            const state = cardStates[idx];
+            const div = document.createElement('div');
+            div.className = 'review-item ' + (state.marked ? 'ok' : 'review');
+            div.innerHTML = `<span class="status">${state.marked ? '✓' : '✗'}</span>${s.english.substring(0, 60)}...`;
+            list.appendChild(div);
+        });
+    }
+
+    document.getElementById('btn-start').addEventListener('click', startCards);
+    btnExam.addEventListener('click', startExam);
+    document.getElementById('btn-back').addEventListener('click', () => showScreen(screenCards));
+    document.getElementById('btn-restart').addEventListener('click', () => {
+        showScreen(screenIntro);
+        renderLevels();
+    });
+
+    renderLevels();
+})();
+</script>
+</body>
+</html>

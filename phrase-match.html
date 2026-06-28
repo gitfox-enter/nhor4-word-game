@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>短语匹配 · 双列考试版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 8px;
+        }
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.13);
+            backdrop-filter: blur(4px);
+            padding: 1rem 0.8rem;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.2s;
+        }
+        h1 {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-weight: 500;
+            color: #e9f2f7;
+            text-shadow: 0 2px 6px #0a1e2b;
+            letter-spacing: 1px;
+            padding: 0 0.2rem 0.6rem 0.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+            gap: 6px 8px;
+            font-size: 1.4rem;
+        }
+        .title-part {
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .title-part small {
+            font-size: 0.75rem;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+        .progress-badge {
+            background: #1f4a5e;
+            padding: 0.3rem 0.8rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #8fc3d9;
+            color: #ddf0fa;
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
+            white-space: nowrap;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem 0.8rem;
+            margin: 0.5rem 0 1rem;
+        }
+        .word-column, .def-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .col-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #bfdef0;
+            font-weight: 400;
+            padding-left: 6px;
+            margin-bottom: 2px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+            padding: 10px 12px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s ease;
+            cursor: pointer;
+            user-select: none;
+            word-break: break-word;
+            line-height: 1.4;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+        }
+        .sentence-card {
+            background: #264e63;
+            border-color: #578aa3;
+        }
+        .phrase-card {
+            background: #1d4d4b;
+            border-color: #479f9b;
+            justify-content: center;
+            text-align: center;
+        }
+        .card.selected {
+            border: 3px solid #f7d44a;
+            background: #3b6c7c;
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(247,212,74,0.4);
+        }
+        .card.matched {
+            opacity: 0.15;
+            transform: scale(0.9);
+            cursor: default;
+            background: #2c3e4a;
+            border-color: #5f7e8c;
+            text-decoration: line-through 1px rgba(255,255,255,0.2);
+            pointer-events: none;
+            filter: grayscale(0.8);
+        }
+        .card.wrong {
+            border-color: #ef5350 !important;
+            background: rgba(239,83,80,0.2) !important;
+            animation: shake 0.4s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .card:active:not(.matched):not(.selected) {
+            transform: scale(0.95);
+        }
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            background: rgba(0,0,0,0.2);
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+            margin-top: 0.3rem;
+        }
+        .status-msg {
+            color: #d4eaf5;
+            font-size: 0.9rem;
+            font-weight: 300;
+            flex: 1;
+        }
+        .status-msg strong {
+            font-weight: 600;
+            color: #fcdb7a;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            background: #e6edf2;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a3e4e;
+            box-shadow: 0 4px 0 #0d2a36;
+            transition: 0.06s linear;
+            cursor: pointer;
+            border: 1px solid #bad7e6;
+            letter-spacing: 0.3px;
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #0d2a36;
+        }
+        .btn-primary {
+            background: #fad974;
+            color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+            border-color: #ffe399;
+        }
+        .btn-secondary {
+            background: #b6d2df;
+        }
+        .footer-note {
+            color: #afcbd9;
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 0.6rem;
+            opacity: 0.7;
+        }
+        .win-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .win-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .win-box {
+            background: rgba(255,255,255,0.13);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 36px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .win-box h2 {
+            color: #fcdb7a;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .win-box p {
+            color: #bfdef0;
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+        }
+        .score-big {
+            font-size: 3rem;
+            font-weight: 600;
+            color: #fcdb7a;
+            margin: 0.5rem 0;
+        }
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 0.6rem 0.4rem;
+                border-radius: 28px;
+            }
+            .game-board {
+                gap: 0.4rem 0.5rem;
+            }
+            .card {
+                font-size: 0.7rem;
+                padding: 8px 10px;
+                min-height: 40px;
+                border-radius: 16px;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .progress-badge {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.5rem;
+            }
+            .status-msg {
+                font-size: 0.8rem;
+            }
+            .btn {
+                font-size: 0.75rem;
+                padding: 5px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="app">
+    <h1>
+        <span class="title-part">📝 短语匹配 <small>10道×2分</small></span>
+        <span class="progress-badge" id="progressDisplay">0 / 10</span>
+    </h1>
+
+    <div class="game-board">
+        <div class="word-column">
+            <div class="col-header">📌 句子（含填空）</div>
+            <div id="sentenceList"></div>
+        </div>
+        <div class="def-column">
+            <div class="col-header">📖 单词/短语</div>
+            <div id="phraseList"></div>
+        </div>
+    </div>
+
+    <div class="control-bar">
+        <span class="status-msg" id="statusMessage">✦ 选句子 → 选单词/短语</span>
+        <div class="btn-group">
+            <button class="btn btn-secondary" id="resetGameBtn">🔄 重开</button>
+        </div>
+    </div>
+    <div class="footer-note">从 Words in use + Expressions in use 混合抽取 · 左右配对</div>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+    <div class="win-box">
+        <h2>🎉 全部配对成功！</h2>
+        <p>得分</p>
+        <div class="score-big" id="finalScore">20 / 20</div>
+        <button class="btn btn-primary" id="winRestart">🔄 再来一次</button>
+    </div>
+</div>
+
+<script>
+(function(){
+    const ALL_PAIRS = [
+        // U1 Words
+        { id: 1, sentence: "With your generous support, our charity fund will be _____ for continued growth and success.", phrase: "poised" },
+        { id: 2, sentence: "The dock was constructed on a(n) _____ scale with the most modern equipment.", phrase: "lavish" },
+        { id: 3, sentence: "Advances in mobile phone technology have enabled the rapid development of _____ communication.", phrase: "instantaneous" },
+        { id: 4, sentence: "Computers, vehicles, paintings, furniture, etc. are all _____ assets.", phrase: "tangible" },
+        { id: 5, sentence: "Students can overcome _____ together through teamwork.", phrase: "hurdles" },
+        { id: 6, sentence: "China rolled out digital driver's licenses amid efforts to _____ services.", phrase: "streamline" },
+        { id: 7, sentence: "Long-term confinement is _____ to the physical well-being of animals.", phrase: "detrimental" },
+        { id: 8, sentence: "The museum is designed to _____ the interest of children in science.", phrase: "evoke" },
+        { id: 9, sentence: "This study tests the _____ that air pollution contributes to lung diseases.", phrase: "hypothesis" },
+        { id: 10, sentence: "If your stress is _____ into more serious issues, seek professional help.", phrase: "escalating" },
+        // U3 Words
+        { id: 11, sentence: "The professor gave remarks to bring _____ to the issue being discussed.", phrase: "clarity" },
+        { id: 12, sentence: "Many governments are _____ to invest in technology to tackle problems.", phrase: "keen" },
+        { id: 13, sentence: "The hotel is an ideal _____ for business meetings and weddings.", phrase: "venue" },
+        { id: 14, sentence: "Online videos are a great way to _____ products to customers.", phrase: "showcase" },
+        { id: 15, sentence: "The _____ of e-commerce has reshaped the way business is conducted.", phrase: "emergence" },
+        { id: 16, sentence: "The kindergarten will get a generous _____ of funds.", phrase: "allocation" },
+        { id: 17, sentence: "Different objectives often _____ with each other in his job.", phrase: "clash" },
+        { id: 18, sentence: "Bird and butterfly wings are _____ in shape and function.", phrase: "analogous" },
+        { id: 19, sentence: "The Chinese economy enjoys strong _____ despite challenges.", phrase: "momentum" },
+        { id: 20, sentence: "Bob played a leading role in _____ the company through growth.", phrase: "navigating" },
+        // U4 Words
+        { id: 21, sentence: "We must maintain the _____ of the building during restoration.", phrase: "integrity" },
+        { id: 22, sentence: "A nurse's _____ response communicates respect and caring.", phrase: "timely" },
+        { id: 23, sentence: "Attempts to preserve animal species and their _____ have succeeded.", phrase: "habitats" },
+        { id: 24, sentence: "This project has _____ so much of her time and energy.", phrase: "consumed" },
+        { id: 25, sentence: "Rising _____ leads to consumption based more on wants than needs.", phrase: "affluence" },
+        { id: 26, sentence: "Improper _____ of plastics endangers marine species.", phrase: "disposal" },
+        { id: 27, sentence: "The signaling system _____ after a heavy rainstorm.", phrase: "collapsed" },
+        { id: 28, sentence: "The _____ of natural resources jeopardizes billions of livelihoods.", phrase: "depletion" },
+        { id: 29, sentence: "Birds would _____ if there were no insects to feed on.", phrase: "perish" },
+        { id: 30, sentence: "Scientists have made _____ achievements in hydrology research.", phrase: "monumental" },
+        // U6 Words
+        { id: 31, sentence: "These shelves store cell phones and other small _____.", phrase: "gadgets" },
+        { id: 32, sentence: "The only _____ choice is to embrace the technological revolution.", phrase: "viable" },
+        { id: 33, sentence: "Saving species from becoming _____ protects the ecosystem.", phrase: "extinct" },
+        { id: 34, sentence: "The vase has a _____ design that stands out from round shapes.", phrase: "linear" },
+        { id: 35, sentence: "Automation has improved productivity and _____ time to accomplish work.", phrase: "slashed" },
+        { id: 36, sentence: "The theater has a(n) _____ system of stage machinery.", phrase: "intricate" },
+        { id: 37, sentence: "Reform and opening up _____ an era of economic growth.", phrase: "inaugurated" },
+        { id: 38, sentence: "People need to _____ homes to improve airflow.", phrase: "ventilate" },
+        { id: 39, sentence: "Her therapy uses a(n) _____ of music, relaxation, and imagery.", phrase: "synthesis" },
+        { id: 40, sentence: "This window covering lets you _____ light into the room.", phrase: "diffuse" },
+        // U1 Expressions
+        { id: 41, sentence: "Coal _____ decline in many parts of the world.", phrase: "is projected to" },
+        { id: 42, sentence: "The lifestyle he wanted is _____.", phrase: "within his grasp" },
+        { id: 43, sentence: "AI machines _____ the human brain.", phrase: "are modeled on" },
+        { id: 44, sentence: "Dennis was able to _____ himself _____ the overweight problem.", phrase: "rid; of" },
+        { id: 45, sentence: "I can respond to your questions _____.", phrase: "within a moment's notice" },
+        { id: 46, sentence: "_____, we require all visitors to sign in.", phrase: "To that end" },
+        { id: 47, sentence: "We shouldn't _____ success _____ financial status.", phrase: "equate; to" },
+        { id: 48, sentence: "_____ the health risks, smoking makes finding a job harder.", phrase: "On top of" },
+        // U3 Expressions
+        { id: 49, sentence: "Working from home has slowly _____ across the country.", phrase: "gained ground" },
+        { id: 50, sentence: "Students _____ the summer camp _____ life-changing.", phrase: "hailed; as" },
+        { id: 51, sentence: "Experiment with techniques and _____ what you learned _____.", phrase: "put; into practice" },
+        { id: 52, sentence: "The artist restored the painting and _____ it _____.", phrase: "brought; to life" },
+        { id: 53, sentence: "Environments that are _____ learning increase success.", phrase: "conducive to" },
+        { id: 54, sentence: "Be open to new ways of thinking and _____ what you do.", phrase: "reflect on" },
+        { id: 55, sentence: "The budget meeting _____ and members filed out.", phrase: "drew to a close" },
+        { id: 56, sentence: "The Mid-Autumn Festival history can be _____ 3,000 years ago.", phrase: "traced back to" },
+        // U4 Expressions
+        { id: 57, sentence: "If goods do not _____ contract specifications, compensation may be requested.", phrase: "comply with" },
+        { id: 58, sentence: "The new chocolate bar _____ than previous products.", phrase: "fared no better" },
+        { id: 59, sentence: "We should _____ the intake of high-calorie foods.", phrase: "cut down on" },
+        { id: 60, sentence: "Wastewater and CO₂ _____ human life.", phrase: "pose a threat to" },
+        { id: 61, sentence: "Oil price rise _____ supply and demand changes.", phrase: "bear no links to" },
+        { id: 62, sentence: "Experiment cost must _____ potential benefit to society.", phrase: "be weighed against" },
+        { id: 63, sentence: "We need to _____ natural resources and minimize waste.", phrase: "economize on" },
+        { id: 64, sentence: "Your account will _____ if not updated right away.", phrase: "be in jeopardy" },
+        // U6 Expressions
+        { id: 65, sentence: "Your schedule would quickly _____ with other people's agendas.", phrase: "fill up" },
+        { id: 66, sentence: "AI developed and applied _____ large _____.", phrase: "on a; scale" },
+        { id: 67, sentence: "I _____ rates, mortgage, and house insurance.", phrase: "factored in" },
+        { id: 68, sentence: "Cleaning carpets _____ weekly _____.", phrase: "on a; basis" },
+        { id: 69, sentence: "It will take weeks to fully _____ the debris.", phrase: "clear up" },
+        { id: 70, sentence: "The data _____ various sources.", phrase: "was derived from" },
+        { id: 71, sentence: "The future does not _____ any single test's success.", phrase: "hinge on" }
+    ];
+
+    const TOTAL_PAIRS = 10;
+    let currentPairs = [];
+    let matchCount = 0;
+    let selectedElement = null;
+
+    const sentenceListEl = document.getElementById('sentenceList');
+    const phraseListEl = document.getElementById('phraseList');
+    const statusMsg = document.getElementById('statusMessage');
+    const progressDisplay = document.getElementById('progressDisplay');
+    const winOverlay = document.getElementById('winOverlay');
+    const finalScoreEl = document.getElementById('finalScore');
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function clearSelected() {
+        if (selectedElement) {
+            selectedElement.classList.remove('selected');
+            selectedElement = null;
+        }
+    }
+
+    function updateProgress() {
+        progressDisplay.textContent = `${matchCount} / ${TOTAL_PAIRS}`;
+    }
+
+    function renderGame() {
+        sentenceListEl.innerHTML = '';
+        phraseListEl.innerHTML = '';
+        clearSelected();
+        matchCount = 0;
+        updateProgress();
+        statusMsg.innerHTML = `✦ 选句子 → 选单词/短语`;
+        winOverlay.classList.remove('show');
+
+        // Shuffle and pick 10 pairs
+        const shuffled = shuffleArray([...ALL_PAIRS]);
+        currentPairs = shuffled.slice(0, TOTAL_PAIRS);
+
+        // Create sentence cards
+        const sentenceCards = currentPairs.map((pair, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card sentence-card';
+            card.textContent = pair.sentence;
+            card.dataset.pairId = pair.id;
+            card.dataset.type = 'sentence';
+            card.id = `sentence-${idx}`;
+            return card;
+        });
+
+        // Create phrase cards
+        const phraseCards = currentPairs.map((pair, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card phrase-card';
+            card.textContent = pair.phrase;
+            card.dataset.pairId = pair.id;
+            card.dataset.type = 'phrase';
+            card.id = `phrase-${idx}`;
+            return card;
+        });
+
+        // Shuffle each column separately
+        const shuffledSentences = shuffleArray(sentenceCards);
+        const shuffledPhrases = shuffleArray(phraseCards);
+
+        shuffledSentences.forEach(card => sentenceListEl.appendChild(card));
+        shuffledPhrases.forEach(card => phraseListEl.appendChild(card));
+
+        attachEvents();
+    }
+
+    function attachEvents() {
+        const allCards = document.querySelectorAll('.card:not(.matched)');
+        allCards.forEach(card => {
+            card.addEventListener('click', cardClickHandler);
+        });
+    }
+
+    function cardClickHandler(e) {
+        const card = e.currentTarget;
+        if (card.classList.contains('matched')) return;
+
+        if (!selectedElement) {
+            card.classList.add('selected');
+            selectedElement = card;
+            const type = card.dataset.type;
+            statusMsg.innerHTML = type === 'sentence' ? `🔍 句子已选，选对应短语` : `🔍 短语已选，选对应句子`;
+            return;
+        }
+
+        if (selectedElement === card) {
+            clearSelected();
+            statusMsg.innerHTML = `✋ 已取消`;
+            return;
+        }
+
+        // Cannot select from same side
+        if (selectedElement.dataset.type === card.dataset.type) {
+            clearSelected();
+            card.classList.add('selected');
+            selectedElement = card;
+            statusMsg.innerHTML = card.dataset.type === 'sentence' ? `🔍 句子已选，选对应短语` : `🔍 短语已选，选对应句子`;
+            return;
+        }
+
+        // Try match
+        if (selectedElement.dataset.pairId === card.dataset.pairId) {
+            // Match!
+            selectedElement.classList.remove('selected');
+            selectedElement.classList.add('matched');
+            card.classList.remove('selected');
+            card.classList.add('matched');
+            matchCount++;
+            updateProgress();
+            statusMsg.innerHTML = `✅ 配对成功！ (${matchCount}/${TOTAL_PAIRS})`;
+            selectedElement = null;
+
+            if (matchCount === TOTAL_PAIRS) {
+                finalScoreEl.textContent = `${matchCount * 2} / ${TOTAL_PAIRS * 2}`;
+                setTimeout(() => {
+                    winOverlay.classList.add('show');
+                }, 300);
+            }
+        } else {
+            // Wrong
+            const wrongCard = card;
+            const selected = selectedElement;
+            wrongCard.classList.add('wrong');
+            selected.classList.add('wrong');
+            statusMsg.innerHTML = `❌ 错误！`;
+            setTimeout(() => {
+                wrongCard.classList.remove('wrong');
+                selected.classList.remove('wrong');
+                clearSelected();
+                statusMsg.innerHTML = `✦ 选句子 → 选单词/短语`;
+            }, 600);
+        }
+    }
+
+    function resetGame() {
+        winOverlay.classList.remove('show');
+        renderGame();
+    }
+
+    document.getElementById('resetGameBtn').addEventListener('click', resetGame);
+    document.getElementById('winRestart').addEventListener('click', resetGame);
+
+    // Init
+    renderGame();
+})();
+</script>
+</body>
+</html>
