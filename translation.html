@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>翻译题 · 对照记忆卡片（真实数据版）</title>
+    <title>翻译题 · 对照记忆卡片（完整真实数据版）</title>
     <script src="data/translations.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -76,6 +76,43 @@
             color: #1d3f4a;
             box-shadow: 0 4px 0 #b3952b;
         }
+        .mnemonic-card {
+            background: linear-gradient(135deg, rgba(250, 217, 116, 0.15), rgba(143, 195, 217, 0.15));
+            border: 2px solid rgba(250, 217, 116, 0.3);
+            border-radius: 20px;
+            padding: 1rem;
+            margin-bottom: 1.2rem;
+        }
+        .mnemonic-title {
+            color: #fad974;
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mnemonic-rhyme {
+            color: #e9f2f7;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .mnemonic-keywords {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .keyword-tag {
+            background: rgba(143, 195, 217, 0.2);
+            border: 1px solid rgba(143, 195, 217, 0.4);
+            border-radius: 12px;
+            padding: 4px 10px;
+            color: #8fc3d9;
+            font-size: 0.8rem;
+        }
         .card-item {
             background: rgba(255,255,255,0.08);
             border: 2px solid rgba(255,255,255,0.12);
@@ -110,6 +147,14 @@
             color: #8fc3d9;
             font-size: 0.8rem;
             font-weight: 500;
+        }
+        .card-mnemonic {
+            color: #fcdb7a;
+            font-size: 0.75rem;
+            background: rgba(252, 219, 122, 0.1);
+            padding: 2px 8px;
+            border-radius: 8px;
+            margin-left: auto;
         }
         .card-english {
             color: #e9f2f7;
@@ -196,12 +241,10 @@
             color: #e9f2f7;
             font-size: 1rem;
             margin-bottom: 0.8rem;
+            font-family: inherit;
         }
         .exam-input::placeholder { color: rgba(255,255,255,0.4); }
-        .exam-input:focus {
-            outline: none;
-            border-color: #fad974;
-        }
+        .exam-input:focus { outline: none; border-color: #fad974; }
         .check-btn {
             background: linear-gradient(135deg, #fad974, #f5c542);
             border: none;
@@ -260,12 +303,29 @@
             font-size: 0.85rem;
         }
         .format-tip strong { color: #fad974; }
+        .quick-review {
+            background: rgba(76, 175, 80, 0.15);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .quick-review-title {
+            color: #81c784;
+            font-size: 0.9rem;
+            margin-bottom: 0.6rem;
+        }
+        .quick-review-content {
+            color: #e9f2f7;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
         <h1>
-            📝 翻译题练习
+            📝 翻译题练习（完整真实数据）
             <small id="unit-label">选择单元</small>
         </h1>
 
@@ -283,6 +343,7 @@
         <div class="mode-toggle">
             <button class="mode-btn active" data-mode="study">📖 学习模式</button>
             <button class="mode-btn" data-mode="exam">✍️ 考试模式</button>
+            <button class="mode-btn" data-mode="quick">⚡ 考前速记</button>
         </div>
 
         <div id="contentArea">
@@ -301,25 +362,41 @@
 
         // 解析英文，高亮括号注释
         function formatEnglish(text) {
-            // 将括号内容用span包裹
             return text.replace(/（([^）]+)）/g, '<span class="annotation">（$1）</span>');
+        }
+
+        // 渲染顺口溜速记卡
+        function renderMnemonicCard() {
+            const mnemonic = MNEMONICS[currentUnit];
+            if (!mnemonic) return '';
+            return `
+                <div class="mnemonic-card">
+                    <div class="mnemonic-title">🧠 顺口溜速记</div>
+                    <div class="mnemonic-rhyme">${mnemonic.rhyme}</div>
+                    <div class="mnemonic-keywords">
+                        ${mnemonic.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+                    </div>
+                </div>
+            `;
         }
 
         // 渲染学习模式
         function renderStudyMode() {
             const container = document.getElementById('contentArea');
             const data = TRANSLATIONS_DATA[currentUnit] || [];
+            const mnemonicHtml = renderMnemonicCard();
 
             if (data.length === 0) {
                 container.innerHTML = '<div style="color:#8fc3d9;text-align:center;padding:2rem;">该单元暂无数据</div>';
                 return;
             }
 
-            container.innerHTML = data.map(item => `
+            container.innerHTML = mnemonicHtml + data.map(item => `
                 <div class="card-item">
                     <div class="card-header">
                         <span class="card-num">${item.num}</span>
                         <span class="card-label">翻译题 ${item.num}</span>
+                        ${item.mnemonic ? `<span class="card-mnemonic">🧠 ${item.mnemonic}</span>` : ''}
                     </div>
                     <div class="card-english">
                         ${formatEnglish(item.english)}
@@ -329,6 +406,38 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        // 渲染考前速记模式
+        function renderQuickReviewMode() {
+            const container = document.getElementById('contentArea');
+            const data = TRANSLATIONS_DATA[currentUnit] || [];
+            const mnemonic = MNEMONICS[currentUnit];
+
+            if (data.length === 0) {
+                container.innerHTML = '<div style="color:#8fc3d9;text-align:center;padding:2rem;">该单元暂无数据</div>';
+                return;
+            }
+
+            const allEnglish = data.map(item => item.english).join('\n\n');
+            const allChinese = data.map(item => item.chinese).join('\n\n');
+
+            container.innerHTML = `
+                ${renderMnemonicCard()}
+                <div class="quick-review">
+                    <div class="quick-review-title">⚡ 考前快速复习 - ${currentUnit}</div>
+                    <div class="quick-review-content">
+                        <strong style="color:#fad974;">英文原文（带注释）：</strong>
+                        <div style="margin: 0.8rem 0;padding:0.8rem;background:rgba(0,0,0,0.2);border-radius:12px;">
+                            ${formatEnglish(allEnglish).replace(/\n\n/g, '<br><br>')}
+                        </div>
+                        <strong style="color:#fad974;">中文翻译：</strong>
+                        <div style="margin: 0.8rem 0;padding:0.8rem;background:rgba(250,217,116,0.1);border-radius:12px;">
+                            ${allChinese.replace(/\n\n/g, '<br><br>')}
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         // 渲染考试模式
@@ -354,9 +463,10 @@
                             </div>
                             <textarea
                                 class="exam-input"
-                                rows="3"
+                                rows="4"
                                 placeholder="请写出英文原文（在生词/关键词后加括号中文注释）..."
                                 data-answer="${item.english.replace(/"/g, '&quot;')}"
+                                data-mnemonic="${item.mnemonic || ''}"
                             ></textarea>
                             <button class="check-btn" onclick="checkAnswer(${idx})">检查答案</button>
                             <div class="result" id="result-${idx}" style="display:none;"></div>
@@ -373,6 +483,7 @@
             const result = document.getElementById(`result-${idx}`);
             const correctAnswer = input.dataset.answer;
             const userAnswer = input.value.trim();
+            const mnemonic = input.dataset.mnemonic;
 
             if (!userAnswer) {
                 result.innerHTML = '⚠️ 请先输入答案';
@@ -390,7 +501,11 @@
                 result.innerHTML = '✅ 正确！';
                 result.className = 'result correct';
             } else {
-                result.innerHTML = `❌ 需要再努力<br><br><strong>参考答案：</strong><br>${formatEnglish(correctAnswer)}`;
+                let hint = '';
+                if (mnemonic) {
+                    hint = `<br><br>💡 <strong>记忆提示：</strong>${mnemonic}`;
+                }
+                result.innerHTML = `❌ 需要再努力<br><br><strong>参考答案：</strong><br>${formatEnglish(correctAnswer)}${hint}`;
                 result.className = 'result wrong';
             }
             result.style.display = 'block';
@@ -400,8 +515,10 @@
         function render() {
             if (currentMode === 'study') {
                 renderStudyMode();
-            } else {
+            } else if (currentMode === 'exam') {
                 renderExamMode();
+            } else if (currentMode === 'quick') {
+                renderQuickReviewMode();
             }
         }
 
