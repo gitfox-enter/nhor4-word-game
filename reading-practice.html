@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>阅读理解 · 练习</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(145deg, #1b3b4f 0%, #2a5f7a 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 12px;
+        }
+        .game-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.13);
+            backdrop-filter: blur(4px);
+            padding: 1.2rem 1rem;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-weight: 500;
+            color: #e9f2f7;
+            text-shadow: 0 2px 6px #0a1e2b;
+            letter-spacing: 1px;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h1 small {
+            font-size: 0.85rem;
+            font-weight: 300;
+            opacity: 0.8;
+            background: #1f4a5e;
+            padding: 0.3rem 0.8rem;
+            border-radius: 60px;
+            border: 1px solid #8fc3d9;
+        }
+        .level-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
+        .level-btn {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #bfdef0;
+            cursor: pointer;
+            transition: 0.15s;
+            backdrop-filter: blur(2px);
+        }
+        .level-btn:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .level-btn.active {
+            background: #fad974;
+            border-color: #ffe399;
+            color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+        }
+        .passage-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1.2rem;
+            color: #d4eaf5;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .question-box {
+            background: rgba(255,255,255,0.08);
+            border: 2px solid rgba(255,255,255,0.12);
+            border-radius: 24px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .question-text {
+            color: #e9f2f7;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+        .option-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .option-btn {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 10px 14px;
+            color: #d4eaf5;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .option-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .option-btn.selected {
+            background: rgba(255,255,255,0.15);
+            border-color: #fad974;
+        }
+        .option-btn.correct {
+            background: rgba(76,175,80,0.3);
+            border-color: #4caf50;
+        }
+        .option-btn.wrong {
+            background: rgba(244,67,54,0.3);
+            border-color: #f44336;
+        }
+        .btn {
+            background: #fad974;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1d3f4a;
+            box-shadow: 0 4px 0 #b3952b;
+            transition: 0.06s linear;
+            cursor: pointer;
+            border: 1px solid #ffe399;
+            letter-spacing: 0.3px;
+            display: inline-block;
+        }
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #b3952b;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .progress-bar {
+            background: rgba(0,0,0,0.3);
+            border-radius: 30px;
+            height: 6px;
+            margin: 0 0 1rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: #fad974;
+            height: 6px;
+            border-radius: 30px;
+            transition: width 0.25s ease;
+        }
+        .feedback-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 0.8rem 1rem;
+            margin-top: 0.8rem;
+            color: #bfdef0;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            display: none;
+        }
+        .feedback-box.show {
+            display: block;
+        }
+        .feedback-box.correct {
+            border-left: 4px solid #4caf50;
+        }
+        .feedback-box.wrong {
+            border-left: 4px solid #f44336;
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .progress-text {
+            color: #bfdef0;
+            font-size: 0.9rem;
+        }
+        .progress-text strong {
+            color: #fcdb7a;
+        }
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 0.8rem 0.6rem;
+                border-radius: 28px;
+            }
+            h1 {
+                font-size: 1.1rem;
+            }
+            .passage-box, .question-text, .option-btn {
+                font-size: 0.82rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>📖 阅读理解 <small>Multiple Choice</small></h1>
+
+    <div class="level-grid" id="levelGrid"></div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+    <div class="passage-box" id="passage-box">
+        <strong>📖 Passage:</strong><br>
+        <span id="passage-text">Loading...</span>
+    </div>
+
+    <div id="questions-container"></div>
+
+    <div class="nav-bar">
+        <span class="progress-text">进度: <strong id="question-progress">0/0</strong></span>
+        <button class="btn" id="btn-submit" disabled>提交答案</button>
+    </div>
+</div>
+
+<script>
+(function(){
+    const PASSAGES = [
+        {
+            unit: 'U1',
+            title: 'Life and Logic (U1)',
+            passage: 'In today\'s fast-paced world, the concept of "work-life balance" has become increasingly important. Many people find themselves struggling to juggle the demands of their careers with their personal lives. This has led to a rise in stress-related health issues and a decrease in overall life satisfaction. However, recent studies suggest that achieving a perfect balance may not be realistic or even desirable. Instead, experts recommend focusing on "work-life integration" - finding ways to blend work and personal responsibilities in a way that feels authentic and sustainable. This might mean setting boundaries, prioritizing self-care, and learning to say "no" to non-essential commitments.',
+            questions: [
+                {
+                    question: 'What is the main idea of this passage?',
+                    options: [
+                        'Work-life balance is easy to achieve',
+                        'Work-life integration is a better approach than perfect balance',
+                        'People should work less and relax more',
+                        'Stress is unavoidable in modern life'
+                    ],
+                    answer: 1,
+                    explanation: 'The passage suggests that "work-life integration" is a more realistic and desirable approach than trying to achieve perfect balance.'
+                },
+                {
+                    question: 'According to the passage, what has led to stress-related health issues?',
+                    options: [
+                        'Too much leisure time',
+                        'Difficulty balancing work and personal life',
+                        'Lack of career opportunities',
+                        'Poor diet and exercise habits'
+                    ],
+                    answer: 1,
+                    explanation: 'The passage states that struggling to juggle career demands with personal lives has led to stress-related health issues.'
+                },
+                {
+                    question: 'What do experts recommend instead of perfect balance?',
+                    options: [
+                        'Working longer hours',
+                        'Ignoring personal responsibilities',
+                        'Work-life integration',
+                        'Quitting your job'
+                    ],
+                    answer: 2,
+                    explanation: 'Experts recommend "work-life integration" - blending work and personal responsibilities in an authentic and sustainable way.'
+                }
+            ]
+        },
+        {
+            unit: 'U3',
+            title: 'Makerspace (U3)',
+            passage: 'The makerspace movement has gained significant momentum in recent years. These collaborative workspaces provide tools, technology, and community support for people to design and create projects. From 3D printers and laser cutters to sewing machines and woodworking tools, makerspaces offer access to equipment that many individuals could not afford on their own. Beyond just providing tools, makerspaces foster a culture of learning, experimentation, and sharing. They host workshops, classes, and events where members can learn new skills and collaborate on projects. This democratization of manufacturing and creativity has the potential to revolutionize how we innovate and solve problems.',
+            questions: [
+                {
+                    question: 'What is a makerspace?',
+                    options: [
+                        'A place to buy tools',
+                        'A collaborative workspace for creating projects',
+                        'A factory for mass production',
+                        'A school for engineering'
+                    ],
+                    answer: 1,
+                    explanation: 'A makerspace is a collaborative workspace that provides tools, technology, and community support for designing and creating projects.'
+                },
+                {
+                    question: 'Why do makerspaces democratize manufacturing?',
+                    options: [
+                        'They sell cheap tools',
+                        'They provide access to expensive equipment',
+                        'They teach people how to manufacture',
+                        'They replace factories'
+                    ],
+                    answer: 1,
+                    explanation: 'Makerspaces democratize manufacturing by providing access to equipment that individuals could not afford on their own.'
+                },
+                {
+                    question: 'What culture do makerspaces foster?',
+                    options: [
+                        'Competition and profit',
+                        'Learning, experimentation, and sharing',
+                        'Silence and focus',
+                        'Mass production'
+                    ],
+                    answer: 1,
+                    explanation: 'Makerspaces foster a culture of learning, experimentation, and sharing.'
+                }
+            ]
+        }
+    ];
+
+    let currentPassageIndex = 0;
+    let currentQuestionIndex = 0;
+    let selectedAnswers = [];
+    let showingFeedback = false;
+
+    const levelGrid = document.getElementById('levelGrid');
+    const passageText = document.getElementById('passage-text');
+    const questionsContainer = document.getElementById('questions-container');
+    const progressFill = document.getElementById('progress-fill');
+    const questionProgress = document.getElementById('question-progress');
+    const btnSubmit = document.getElementById('btn-submit');
+
+    function renderLevels() {
+        levelGrid.innerHTML = '';
+        PASSAGES.forEach((passage, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'level-btn' + (idx === currentPassageIndex ? ' active' : '');
+            btn.textContent = passage.unit;
+            btn.addEventListener('click', () => {
+                currentPassageIndex = idx;
+                currentQuestionIndex = 0;
+                selectedAnswers = [];
+                showingFeedback = false;
+                renderLevels();
+                loadPassage();
+            });
+            levelGrid.appendChild(btn);
+        });
+    }
+
+    function loadPassage() {
+        const passage = PASSAGES[currentPassageIndex];
+        passageText.textContent = passage.passage;
+        selectedAnswers = new Array(passage.questions.length).fill(-1);
+        currentQuestionIndex = 0;
+        showingFeedback = false;
+        renderQuestion();
+        updateProgress();
+    }
+
+    function renderQuestion() {
+        const passage = PASSAGES[currentPassageIndex];
+        const question = passage.questions[currentQuestionIndex];
+        
+        questionsContainer.innerHTML = '';
+        
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-box';
+        questionDiv.innerHTML = `
+            <div class="question-text">Q${currentQuestionIndex + 1}: ${question.question}</div>
+            <div class="option-list">
+                ${question.options.map((opt, i) => `
+                    <button class="option-btn ${selectedAnswers[currentQuestionIndex] === i ? 'selected' : ''}" data-option="${i}">
+                        ${String.fromCharCode(65 + i)}. ${opt}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="feedback-box ${showingFeedback ? 'show' : ''} ${selectedAnswers[currentQuestionIndex] === question.answer ? 'correct' : 'wrong'}" id="feedback-box">
+                ${showingFeedback ? (selectedAnswers[currentQuestionIndex] === question.answer ? '✅ 正确！' : '❌ 错误。') + ' ' + question.explanation : ''}
+            </div>
+        `;
+        
+        questionsContainer.appendChild(questionDiv);
+        
+        // Add event listeners to options
+        questionDiv.querySelectorAll('.option-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (showingFeedback) return; // Can't change answer after submission
+                
+                const optionIdx = parseInt(e.target.dataset.option);
+                selectedAnswers[currentQuestionIndex] = optionIdx;
+                
+                // Update UI
+                questionDiv.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                e.target.classList.add('selected');
+                
+                btnSubmit.disabled = false;
+            });
+        });
+    }
+
+    function updateProgress() {
+        const passage = PASSAGES[currentPassageIndex];
+        const total = passage.questions.length;
+        questionProgress.textContent = `${currentQuestionIndex + 1}/${total}`;
+        progressFill.style.width = `${((currentQuestionIndex + 1) / total) * 100}%`;
+    }
+
+    btnSubmit.addEventListener('click', () => {
+        if (selectedAnswers[currentQuestionIndex] === -1) return;
+        
+        showingFeedback = true;
+        renderQuestion();
+        
+        // Check if all questions answered
+        const passage = PASSAGES[currentPassageIndex];
+        const allAnswered = selectedAnswers.every(a => a !== -1);
+        
+        if (allAnswered) {
+            btnSubmit.textContent = '查看结果';
+            btnSubmit.onclick = showResult;
+        } else {
+            btnSubmit.textContent = '下一题';
+            btnSubmit.onclick = nextQuestion;
+        }
+    });
+
+    function nextQuestion() {
+        const passage = PASSAGES[currentPassageIndex];
+        if (currentQuestionIndex < passage.questions.length - 1) {
+            currentQuestionIndex++;
+            showingFeedback = false;
+            renderQuestion();
+            updateProgress();
+            btnSubmit.textContent = '提交答案';
+            btnSubmit.disabled = true;
+            btnSubmit.onclick = () => btnSubmit.click(); // Reset to original handler
+        }
+    }
+
+    function showResult() {
+        const passage = PASSAGES[currentPassageIndex];
+        const correct = selectedAnswers.filter((a, i) => a === passage.questions[i].answer).length;
+        const total = passage.questions.length;
+        
+        alert(`练习完成！\n答对: ${correct}/${total}\n正确率: ${Math.round(correct/total*100)}%`);
+        
+        // Reset
+        currentQuestionIndex = 0;
+        selectedAnswers = [];
+        showingFeedback = false;
+        loadPassage();
+        btnSubmit.textContent = '提交答案';
+        btnSubmit.disabled = true;
+        btnSubmit.onclick = () => btnSubmit.click();
+    }
+
+    // Initialize
+    renderLevels();
+    loadPassage();
+})();
+</script>
+</body>
+</html>
