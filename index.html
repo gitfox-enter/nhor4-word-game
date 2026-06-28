@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>新视野大学英语 4 读写教程复习游戏</title>
+    <title>新视野大学英语 4 读写教程 · 复习游戏</title>
     <style>
         * {
             box-sizing: border-box;
@@ -16,7 +16,7 @@
             min-height: 100dvh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             padding: 16px;
         }
@@ -29,6 +29,7 @@
             border-radius: 36px;
             box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.15);
+            margin: 20px 0;
         }
         .header {
             text-align: center;
@@ -48,99 +49,29 @@
             font-size: 0.9rem;
             font-weight: 300;
         }
-        .unit-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .unit-card {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(2px);
-            padding: 16px 20px;
-            border-radius: 30px;
-            border: 2px solid transparent;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            text-decoration: none;
-            color: white;
-        }
-        .unit-card:hover {
-            transform: scale(1.02);
-            border-color: #f7d44a;
-            box-shadow: 0 0 0 3px rgba(247,212,74,0.4);
-        }
-        .unit-card:active {
-            transform: scale(0.97);
-        }
-        .exam-card {
-            background: linear-gradient(135deg, #2a5770, #1f4a5e);
-            border-color: #fcdb7a;
-            position: relative;
-            overflow: hidden;
-        }
-        .exam-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -30%;
-            width: 80px;
-            height: 80px;
-            background: rgba(252,219,122,0.15);
-            border-radius: 50%;
-        }
-        .unit-card:nth-child(1) {
-            background: #264e63;
-            border-color: #578aa3;
-        }
-        .unit-card:nth-child(2) {
-            background: #1d4d4b;
-            border-color: #479f9b;
-        }
-        .unit-card:nth-child(3) {
-            background: #264e63;
-            border-color: #578aa3;
-        }
-        .unit-card:nth-child(4) {
-            background: #1d4d4b;
-            border-color: #479f9b;
-        }
-        .unit-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .unit-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        .unit-subtitle {
-            font-size: 0.8rem;
-            font-weight: 300;
-            opacity: 0.7;
-        }
-        .unit-badge {
-            background: rgba(255,255,255,0.15);
-            padding: 6px 14px;
+        .update-badge {
+            display: inline-block;
+            background: #fad974;
+            color: #1d3f4a;
+            padding: 4px 12px;
             border-radius: 60px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #fcdb7a;
-            border: 1px solid rgba(255,255,255,0.2);
-            white-space: nowrap;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .section {
+            margin-bottom: 1.5rem;
         }
         .section-title {
             color: #fcdb7a;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 600;
             letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.4rem;
             padding-left: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .section-desc {
             color: #afcbd9;
@@ -150,53 +81,80 @@
             padding-left: 6px;
             line-height: 1.5;
         }
-        .external-link {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.05);
-            border: 1px dashed rgba(255,255,255,0.2);
-            border-radius: 20px;
-            padding: 12px 16px;
-            margin-top: 0.5rem;
-            color: #bfdef0;
-            font-size: 0.85rem;
-            text-decoration: none;
-            transition: all 0.15s ease;
-        }
-        .external-link:hover {
-            background: rgba(255,255,255,0.1);
-            border-color: rgba(252,219,122,0.5);
-        }
-        .external-link .icon {
-            font-size: 1.2rem;
-        }
-        .placeholder-list {
+        .card-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            margin-top: 0.5rem;
-        }
-        .placeholder-item {
-            display: flex;
-            align-items: center;
             gap: 10px;
-            background: rgba(0,0,0,0.15);
-            border-radius: 16px;
-            padding: 10px 14px;
-            color: #8fa8b8;
-            font-size: 0.85rem;
         }
-        .placeholder-item .num {
-            color: #fcdb7a;
+        .card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+            padding: 14px 18px;
+            border-radius: 30px;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            color: white;
+        }
+        .card:hover {
+            transform: scale(1.02);
+            border-color: #f7d44a;
+            box-shadow: 0 0 0 3px rgba(247,212,74,0.4);
+        }
+        .card:active {
+            transform: scale(0.97);
+        }
+        .card.primary {
+            background: linear-gradient(135deg, #2a5770, #1f4a5e);
+            border-color: #fcdb7a;
+        }
+        .card.new {
+            position: relative;
+            overflow: hidden;
+        }
+        .card.new::after {
+            content: 'NEW';
+            position: absolute;
+            top: 8px;
+            right: -20px;
+            background: #ef5350;
+            color: white;
+            padding: 2px 25px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            transform: rotate(45deg);
+        }
+        .card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+        .card-title {
+            font-size: 1rem;
             font-weight: 600;
-            min-width: 20px;
+            letter-spacing: 0.5px;
         }
-        .placeholder-item .score {
-            margin-left: auto;
-            color: #6b8a9a;
+        .card-subtitle {
             font-size: 0.75rem;
+            font-weight: 300;
+            opacity: 0.7;
+        }
+        .card-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 5px 12px;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #fcdb7a;
+            border: 1px solid rgba(255,255,255,0.2);
+            white-space: nowrap;
+            margin-left: 12px;
         }
         .divider {
             height: 1px;
@@ -210,6 +168,25 @@
             font-size: 0.75rem;
             opacity: 0.6;
         }
+        .external-link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 12px 16px;
+            margin-top: 1rem;
+            color: #bfdef0;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+        .external-link:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(252,219,122,0.5);
+        }
         @media (max-width: 480px) {
             .container {
                 padding: 1.2rem 1rem;
@@ -218,12 +195,12 @@
             .header h1 {
                 font-size: 1.3rem;
             }
-            .unit-card {
+            .card {
                 padding: 12px 16px;
                 border-radius: 24px;
             }
-            .unit-title {
-                font-size: 0.95rem;
+            .card-title {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -231,157 +208,175 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🧩 新视野大学英语 4<br>读写教程复习游戏</h1>
-        <p>按题型分类 · 练习+考试模式</p>
+        <h1>🧩 新视野大学英语 4<br>读写教程 · 复习游戏</h1>
+        <p>真实数据 · 游戏化练习 · 考试模拟</p>
+        <div class="update-badge">✨ 已接入 ima 知识库真实数据</div>
     </div>
 
     <!-- 一、单词匹配 -->
-    <div class="section-title">一、单词匹配 10道×1分</div>
-    <div class="section-desc">4个项目 · 逐单元练习</div>
-    <div class="unit-list" style="margin-bottom:1.5rem;">
-        <a class="unit-card" href="unit1.html">
-            <div class="unit-info">
-                <span class="unit-title">📌 第一单元</span>
-                <span class="unit-subtitle">Unit 1 · Life and Logic</span>
-            </div>
-            <span class="unit-badge">69 词</span>
-        </a>
-        <a class="unit-card" href="unit3.html">
-            <div class="unit-info">
-                <span class="unit-title">📖 第三单元</span>
-                <span class="unit-subtitle">Unit 3 · Makerspace</span>
-            </div>
-            <span class="unit-badge">55 词</span>
-        </a>
-        <a class="unit-card" href="unit4.html">
-            <div class="unit-info">
-                <span class="unit-title">🌱 第四单元</span>
-                <span class="unit-subtitle">Unit 4 · Nature and Environment</span>
-            </div>
-            <span class="unit-badge">55 词</span>
-        </a>
-        <a class="unit-card" href="unit6.html">
-            <div class="unit-info">
-                <span class="unit-title">🔤 第六单元</span>
-                <span class="unit-subtitle">Unit 6 · Energy and Technology</span>
-            </div>
-            <span class="unit-badge">72 词</span>
-        </a>
-    </div>
-
-    <!-- 二、短语 -->
-    <div class="section-title">二、短语 10道×2分</div>
-    <div class="section-desc">8个项目 · 逐单元练习</div>
-    <div class="unit-list" style="margin-bottom:1.5rem;">
-        <a class="unit-card" href="phrase-u1.html">
-            <div class="unit-info">
-                <span class="unit-title">📝 第一单元</span>
-                <span class="unit-subtitle">Expressions + Words in use · U1</span>
-            </div>
-            <span class="unit-badge">18 句</span>
-        </a>
-        <a class="unit-card" href="phrase-u3.html">
-            <div class="unit-info">
-                <span class="unit-title">📝 第三单元</span>
-                <span class="unit-subtitle">Expressions + Words in use · U3</span>
-            </div>
-            <span class="unit-badge">18 句</span>
-        </a>
-        <a class="unit-card" href="phrase-u4.html">
-            <div class="unit-info">
-                <span class="unit-title">📝 第四单元</span>
-                <span class="unit-subtitle">Expressions + Words in use · U4</span>
-            </div>
-            <span class="unit-badge">18 句</span>
-        </a>
-        <a class="unit-card" href="phrase-u6.html">
-            <div class="unit-info">
-                <span class="unit-title">📝 第六单元</span>
-                <span class="unit-subtitle">Expressions + Words in use · U6</span>
-            </div>
-            <span class="unit-badge">17 句</span>
-        </a>
-        <a class="unit-card exam-card" href="phrase-exam.html">
-            <div class="unit-info">
-                <span class="unit-title">🎯 短语考试模拟</span>
-                <span class="unit-subtitle">随机抽10题 · 考试模式</span>
-            </div>
-            <span class="unit-badge">10题</span>
-        </a>
-    </div>
-
-    <!-- 三、阅读（占位） -->
-    <div class="section-title">三、阅读 3道×10分</div>
-    <div class="section-desc">4个项目 · 暂不支持游戏化</div>
-    <div class="placeholder-list" style="margin-bottom:1rem;">
-        <div class="placeholder-item">
-            <span class="num">1.</span>
-            <span>阅读 Passage 1</span>
-            <span class="score">U1</span>
+    <div class="section">
+        <div class="section-title">📝 一、单词匹配</div>
+        <div class="section-desc">
+            从 ima 知识库提取真实单词数据（266个单词）<br>
+            支持单元选择、考试模式、答案分析
         </div>
-        <div class="placeholder-item">
-            <span class="num">2.</span>
-            <span>阅读 Passage 2</span>
-            <span class="score">U3</span>
-        </div>
-        <div class="placeholder-item">
-            <span class="num">3.</span>
-            <span>阅读 Passage 3</span>
-            <span class="score">U4</span>
-        </div>
-        <div class="placeholder-item">
-            <span class="num">4.</span>
-            <span>阅读 Passage 4</span>
-            <span class="score">U6</span>
+        <div class="card-list">
+            <a class="card primary new" href="word-exam-v2.html">
+                <div class="card-info">
+                    <span class="card-title">🎯 单词考试模拟（真实数据）</span>
+                    <span class="card-subtitle">随机抽题 · 计时考试 · 答案分析</span>
+                </div>
+                <span class="card-badge">推荐</span>
+            </a>
+            <a class="card" href="unit1.html">
+                <div class="card-info">
+                    <span class="card-title">📘 Unit 1 单词练习</span>
+                    <span class="card-subtitle">Life and Logic · 70词</span>
+                </div>
+                <span class="card-badge">练习</span>
+            </a>
+            <a class="card" href="unit3.html">
+                <div class="card-info">
+                    <span class="card-title">📗 Unit 3 单词练习</span>
+                    <span class="card-subtitle">Makerspace · 56词</span>
+                </div>
+                <span class="card-badge">练习</span>
+            </a>
+            <a class="card" href="unit4.html">
+                <div class="card-info">
+                    <span class="card-title">📙 Unit 4 单词练习</span>
+                    <span class="card-subtitle">Nature and Environment · 68词</span>
+                </div>
+                <span class="card-badge">练习</span>
+            </a>
+            <a class="card" href="unit6.html">
+                <div class="card-info">
+                    <span class="card-title">📕 Unit 6 单词练习</span>
+                    <span class="card-subtitle">Energy and Technology · 72词</span>
+                </div>
+                <span class="card-badge">练习</span>
+            </a>
         </div>
     </div>
 
-    <!-- 四、翻译 -->
-    <div class="section-title">四、翻译 1道×15分</div>
-    <div class="section-desc">5个项目 · 对照记忆卡片</div>
-    <div class="unit-list" style="margin-bottom:1.5rem;">
-        <a class="unit-card" href="translation.html">
-            <div class="unit-info">
-                <span class="unit-title">📖 翻译题</span>
-                <span class="unit-subtitle">对照记忆卡片 · 4个单元</span>
-            </div>
-            <span class="unit-badge">12 句</span>
-        </a>
+    <div class="divider"></div>
+
+    <!-- 二、短语练习 -->
+    <div class="section">
+        <div class="section-title">✍️ 二、短语练习</div>
+        <div class="section-desc">
+            Expressions in use · 填空+选择模式<br>
+            支持单元练习和考试模拟
+        </div>
+        <div class="card-list">
+            <a class="card primary new" href="phrase-exam-new.html">
+                <div class="card-info">
+                    <span class="card-title">🎯 短语考试模拟（改进版）</span>
+                    <span class="card-subtitle">统一格式 · 答案分析 · 考试模式</span>
+                </div>
+                <span class="card-badge">推荐</span>
+            </a>
+            <a class="card" href="phrase-u1.html">
+                <div class="card-info">
+                    <span class="card-title">📝 Unit 1 短语练习</span>
+                    <span class="card-subtitle">Expressions + Words in use</span>
+                </div>
+                <span class="card-badge">18题</span>
+            </a>
+            <a class="card" href="phrase-u3.html">
+                <div class="card-info">
+                    <span class="card-title">📝 Unit 3 短语练习</span>
+                    <span class="card-subtitle">Expressions + Words in use</span>
+                </div>
+                <span class="card-badge">18题</span>
+            </a>
+            <a class="card" href="phrase-u4.html">
+                <div class="card-info">
+                    <span class="card-title">📝 Unit 4 短语练习</span>
+                    <span class="card-subtitle">Expressions + Words in use</span>
+                </div>
+                <span class="card-badge">18题</span>
+            </a>
+            <a class="card" href="phrase-u6.html">
+                <div class="card-info">
+                    <span class="card-title">📝 Unit 6 短语练习</span>
+                    <span class="card-subtitle">Expressions + Words in use</span>
+                </div>
+                <span class="card-badge">17题</span>
+            </a>
+        </div>
     </div>
 
-    <!-- 五、作文（占位） -->
-    <div class="section-title">五、作文 1道×25分</div>
-    <div class="section-desc">4个项目 · 暂不支持游戏化</div>
-    <div class="placeholder-list" style="margin-bottom:1rem;">
-        <div class="placeholder-item">
-            <span class="num">1.</span>
-            <span>作文 Topic 1</span>
-            <span class="score">U1</span>
+    <div class="divider"></div>
+
+    <!-- 三、翻译练习 -->
+    <div class="section">
+        <div class="section-title">🌐 三、翻译练习</div>
+        <div class="section-desc">
+            中英文对照记忆卡片<br>
+            统一格式：英文（中文标注）+ 整句中文翻译
         </div>
-        <div class="placeholder-item">
-            <span class="num">2.</span>
-            <span>作文 Topic 2</span>
-            <span class="score">U3</span>
+        <div class="card-list">
+            <a class="card" href="translation.html">
+                <div class="card-info">
+                    <span class="card-title">📖 翻译题记忆卡片</span>
+                    <span class="card-subtitle">4个单元 · 12句翻译</span>
+                </div>
+                <span class="card-badge">记忆</span>
+            </a>
         </div>
-        <div class="placeholder-item">
-            <span class="num">3.</span>
-            <span>作文 Topic 3</span>
-            <span class="score">U4</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 四、阅读（待开发） -->
+    <div class="section">
+        <div class="section-title">📖 四、阅读理解</div>
+        <div class="section-desc">
+            待接入真实数据（ima 知识库已提取）<br>
+            暂不支持游戏化
         </div>
-        <div class="placeholder-item">
-            <span class="num">4.</span>
-            <span>作文 Topic 4</span>
-            <span class="score">U6</span>
+        <div class="card-list">
+            <div class="card" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="card-info">
+                    <span class="card-title">🚧 阅读 Passage 1-4</span>
+                    <span class="card-subtitle">U1 / U3 / U4 / U6</span>
+                </div>
+                <span class="card-badge">待开发</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 五、作文（待开发） -->
+    <div class="section">
+        <div class="section-title">✍️ 五、作文练习</div>
+        <div class="section-desc">
+            待接入真实数据（ima 知识库已提取）<br>
+            暂不支持游戏化
+        </div>
+        <div class="card-list">
+            <div class="card" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="card-info">
+                    <span class="card-title">🚧 作文 Topic 1-4</span>
+                    <span class="card-subtitle">U1 / U3 / U4 / U6</span>
+                </div>
+                <span class="card-badge">待开发</span>
+            </div>
         </div>
     </div>
 
     <a class="external-link" href="https://ima.qq.com/wiki/?shareId=84ff2e40cb713e3c1ffc6ab356018018064e46443d449ae6e73911cb1f997f80" target="_blank">
-        <span class="icon">📚</span>
+        <span>📚</span>
         <span>访问完整知识库（ima.qq.com）</span>
         <span style="margin-left:auto;font-size:1.2rem;">→</span>
     </a>
 
-    <div class="footer">新视野大学英语 4 读写教程 · 复习游戏合集</div>
+    <div class="footer">
+        新视野大学英语 4 读写教程 · 复习游戏合集<br>
+        数据来源：ima 知识库 · 亳州某校酒管2025/2026学年
+    </div>
 </div>
 </body>
 </html>
